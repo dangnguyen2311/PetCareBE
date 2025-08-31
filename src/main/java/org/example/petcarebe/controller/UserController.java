@@ -22,7 +22,7 @@ public class UserController {
         try {
             String password = request.getPassword();
             String username = request.getUsername();
-            int maxPasswordLength = Integer.valueOf(System.getenv("MAX_PASSWORD_LENGTH"));
+            int maxPasswordLength = Integer.parseInt(System.getenv("MAX_PASSWORD_LENGTH"));
             int minPasswordLength = Integer.parseInt(System.getenv("MIN_PASSWORD_LENGTH"));
             int minUsernameLength = Integer.parseInt(System.getenv("MIN_USERNAME_LENGTH"));
             int maxUsernameLength = Integer.parseInt(System.getenv("MAX_USERNAME_LENGTH"));
