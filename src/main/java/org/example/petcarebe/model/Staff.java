@@ -9,7 +9,7 @@ import lombok.Data;
 public class Staff {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "fullname", nullable = false)
     private String fullname;
@@ -27,6 +27,6 @@ public class Staff {
     private String address;
 
     @OneToOne
-    @JoinColumn(name = "UserId", referencedColumnName = "id")
+    @JoinColumn(name = "Userid", referencedColumnName = "id")
     private User user;
 }

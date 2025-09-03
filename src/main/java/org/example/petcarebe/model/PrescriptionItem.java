@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "PrescriptionItem")
+@Table(name = "Prescriptionitem")
 @Data
 public class PrescriptionItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "dosage", nullable = false)
     private String dosage;

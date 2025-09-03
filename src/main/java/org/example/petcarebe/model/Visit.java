@@ -12,7 +12,7 @@ import java.util.List;
 public class Visit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "visit_date", nullable = false)
     private LocalDate visitDate;

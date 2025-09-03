@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "ProductInPromotion")
+@Table(name = "Productinpromotion")
 @Data
 public class ProductInPromotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Productid", nullable = false)

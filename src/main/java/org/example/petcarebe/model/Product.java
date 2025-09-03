@@ -11,7 +11,7 @@ import java.time.LocalDate;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -36,4 +36,10 @@ public class Product {
 
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted;
+
+    @Column(name = "imgUrl")
+    private String imgUrl;
 }

@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "InvoiceDiscount")
+@Table(name = "Invoicediscount")
 @Data
 public class InvoiceDiscount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "applied_amount", nullable = false)
     private Double appliedAmount;

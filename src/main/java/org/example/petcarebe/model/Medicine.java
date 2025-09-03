@@ -9,7 +9,7 @@ import lombok.Data;
 public class Medicine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -22,4 +22,7 @@ public class Medicine {
 
     @Column(name = "notes")
     private String notes;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted;
 }

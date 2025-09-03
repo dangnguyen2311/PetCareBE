@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "ServicePackageInInvoice")
+@Table(name = "Servicepackageininvoice")
 @Data
 public class ServicePackageInInvoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "price", nullable = false)
     private Double price;

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 @Data
 @AllArgsConstructor
 public class UserResponse {
-    private Integer id;
+    private Long id;
     private String username;
     private String role;
     private String message;

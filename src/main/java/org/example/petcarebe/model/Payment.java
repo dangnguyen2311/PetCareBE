@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;

@@ -5,12 +5,12 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "MedicalRecord")
+@Table(name = "Medicalrecord")
 @Data
 public class MedicalRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;

@@ -8,7 +8,7 @@ import lombok.Data;
 public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String fullname;
@@ -23,6 +23,6 @@ public class Admin {
     private String gender;
 
     @OneToOne
-    @JoinColumn(name = "UserId", referencedColumnName = "id")
+    @JoinColumn(name = "Userid", referencedColumnName = "id")
     private User user;
 }

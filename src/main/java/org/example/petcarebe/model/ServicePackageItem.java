@@ -5,12 +5,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "ServicePackageItem")
+@Table(name = "Servicepackageitem")
 @Data
 public class ServicePackageItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

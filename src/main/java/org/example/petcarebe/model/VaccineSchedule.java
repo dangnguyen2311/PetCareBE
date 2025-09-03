@@ -6,12 +6,12 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "VaccineSchedule")
+@Table(name = "Vaccineschedule")
 @Data
 public class VaccineSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "scheduled_date", nullable = false)
     private LocalDate scheduledDate;

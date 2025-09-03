@@ -5,12 +5,12 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "PetWeightRecord")
+@Table(name = "Petweightrecord")
 @Data
 public class PetWeightRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "record_date", nullable = false)
     private LocalDate recordDate;

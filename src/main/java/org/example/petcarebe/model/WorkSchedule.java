@@ -7,12 +7,12 @@ import lombok.Data;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "WorkSchedule")
+@Table(name = "Workschedule")
 @Data
 public class WorkSchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "day_of_week", nullable = false)
     private String dayOfWeek;

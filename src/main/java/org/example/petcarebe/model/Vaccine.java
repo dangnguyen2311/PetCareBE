@@ -10,7 +10,7 @@ import lombok.Data;
 public class Vaccine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -20,4 +20,7 @@ public class Vaccine {
 
     @Column(name = "description", nullable = false)
     private String description;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted;
 }

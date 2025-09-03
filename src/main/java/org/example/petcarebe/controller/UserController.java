@@ -1,7 +1,7 @@
 package org.example.petcarebe.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.petcarebe.dto.request.CreateUserRequest;
+import org.example.petcarebe.dto.request.user.CreateUserRequest;
 import org.example.petcarebe.dto.response.UserResponse;
 import org.example.petcarebe.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +22,17 @@ public class UserController {
         try {
             String password = request.getPassword();
             String username = request.getUsername();
-            int maxPasswordLength = Integer.parseInt(System.getenv("MAX_PASSWORD_LENGTH"));
-            int minPasswordLength = Integer.parseInt(System.getenv("MIN_PASSWORD_LENGTH"));
-            int minUsernameLength = Integer.parseInt(System.getenv("MIN_USERNAME_LENGTH"));
-            int maxUsernameLength = Integer.parseInt(System.getenv("MAX_USERNAME_LENGTH"));
-            if (password.length() < minPasswordLength) {
-                throw new RuntimeException("Password must be at least 3 characters");
-            }
-            if (username.length() < minUsernameLength || username.length() > maxUsernameLength) {
-                throw new RuntimeException("Username must be between 3 and 50 characters");
-            }
+            System.out.println(password + " " + username + request.getRole());
+//            int maxPasswordLength = Integer.parseInt(System.getenv("MAX_PASSWORD_LENGTH"));
+//            int minPasswordLength = Integer.parseInt(System.getenv("MIN_PASSWORD_LENGTH"));
+//            int minUsernameLength = Integer.parseInt(System.getenv("MIN_USERNAME_LENGTH"));
+//            int maxUsernameLength = Integer.parseInt(System.getenv("MAX_USERNAME_LENGTH"));
+//            if (password.length() < minPasswordLength) {
+//                throw new RuntimeException("Password must be at least 3 characters");
+//            }
+//            if (username.length() < minUsernameLength || username.length() > maxUsernameLength) {
+//                throw new RuntimeException("Username must be between 3 and 50 characters");
+//            }
 
             UserResponse response = userService.createUser(request);
             return ResponseEntity.ok(response);

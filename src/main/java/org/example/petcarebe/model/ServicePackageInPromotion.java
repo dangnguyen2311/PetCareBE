@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "ServicePackageInPromotion")
+@Table(name = "Servicepackageinpromotion")
 @Data
 public class ServicePackageInPromotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "Promotionid", nullable = false)

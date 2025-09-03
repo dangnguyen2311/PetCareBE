@@ -1,13 +1,16 @@
 package org.example.petcarebe.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "USER")
+@Data
 public class User {
+    // Getters and Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -17,6 +20,12 @@ public class User {
 
     @Column(name = "role", nullable = false)
     private String role;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted;
+
+    @Column(name = "imgUrl")
+    private String imgUrl;
 
     // Default constructor
     public User() {}
@@ -28,38 +37,6 @@ public class User {
         this.role = role;
     }
 
-    // Getters and Setters
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     @Override
     public String toString() {

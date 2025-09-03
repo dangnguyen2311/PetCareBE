@@ -10,7 +10,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String fullname;
@@ -37,6 +37,6 @@ public class Customer {
     private String status;
 
     @OneToOne
-    @JoinColumn(name = "UserId", referencedColumnName = "id")
+    @JoinColumn(name = "Userid", referencedColumnName = "id")
     private User user;
 }
