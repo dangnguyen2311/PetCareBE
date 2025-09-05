@@ -11,6 +11,6 @@ public class UpdatePetRequest {
     private String gender;
     private LocalDate dateOfBirth;
     private String color;
-    private Long animalTypeId;
+    private Long AnimalTypeId;
 }
 

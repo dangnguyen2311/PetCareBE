@@ -28,6 +28,9 @@ public class Pet {
     @Column(name = "color")
     private String color;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 

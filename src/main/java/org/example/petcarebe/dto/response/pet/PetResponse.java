@@ -1,4 +1,4 @@
-package org.example.petcarebe.dto.response;
+package org.example.petcarebe.dto.response.pet;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +13,8 @@ public class PetResponse {
     private Long id;
     private String name;
     private String breed;
+    private String imgUrl;
+
     private String gender;
     private LocalDate dateOfBirth;
     private String color;

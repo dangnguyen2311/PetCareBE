@@ -7,5 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/appointments")
 public class AppointmentController {
     // Your controller methods will go here
+
 }
 

@@ -1,22 +1,19 @@
-package org.example.petcarebe.controller;
+package org.example.petcarebe.controller.user;
 
 import org.example.petcarebe.dto.request.pet.CreatePetRequest;
-import org.example.petcarebe.dto.request.pet.CreatePetWeightRecordRequest;
 import org.example.petcarebe.dto.request.pet.UpdatePetRequest;
 import org.example.petcarebe.dto.response.pet.PetResponse;
-import org.example.petcarebe.dto.response.pet.PetWeightRecordResponse;
 import org.example.petcarebe.service.PetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/v1/pets")
-public class PetController {
-
+@Controller
+@RestController("/api/v1/user/pets")
+public class PetUserController {
     @Autowired
     private PetService petService;
 
@@ -32,21 +29,9 @@ public class PetController {
         return ResponseEntity.ok(pets);
     }
 
-    @GetMapping("/getlist")
-    public ResponseEntity<List<PetResponse>> getAllPets() {
-        List<PetResponse> pets = petService.getAllPets();
-        return ResponseEntity.ok(pets);
-    }
-
     @PutMapping("/{petId}")
     public ResponseEntity<PetResponse> updatePet(@PathVariable Long petId, @RequestBody UpdatePetRequest request) {
         PetResponse updatedPet = petService.updatePet(petId, request);
-        return ResponseEntity.ok(updatedPet);
-    }
-
-    @PostMapping("/{petId}/image")
-    public ResponseEntity<PetResponse> updatePetImage(@PathVariable Long petId, @RequestParam("file") MultipartFile file) {
-        PetResponse updatedPet = petService.updatePetImage(petId, file);
         return ResponseEntity.ok(updatedPet);
     }
 
@@ -56,15 +41,9 @@ public class PetController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{petId}/add-weight")
-    public ResponseEntity<PetWeightRecordResponse> addPetWeightRecordByPetId(
-            @PathVariable Long petId,
-            CreatePetWeightRecordRequest request
-    ) {
-        PetWeightRecordResponse response = petService.createPetWeightRecord(petId, request);
-        return ResponseEntity.ok(response);
+    @PutMapping("/update-animal/{petId}")
+    public ResponseEntity<PetResponse> updatePetAnimal(@PathVariable Long petId, @RequestBody UpdatePetRequest request) {
+        PetResponse updatedPet = petService.updateAnimalType(petId, request);
+        return ResponseEntity.ok(updatedPet);
     }
-
-
 }
-

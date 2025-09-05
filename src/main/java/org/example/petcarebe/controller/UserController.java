@@ -2,7 +2,7 @@ package org.example.petcarebe.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.petcarebe.dto.request.user.CreateUserRequest;
-import org.example.petcarebe.dto.response.UserResponse;
+import org.example.petcarebe.dto.response.user.UserResponse;
 import org.example.petcarebe.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

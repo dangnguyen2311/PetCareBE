@@ -1,5 +1,6 @@
 package org.example.petcarebe.dto.request.pet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ public class CreatePetRequest {
     private String gender;
     private LocalDate dateOfBirth;
     private String color;
-    private Long animalTypeId;
-    private Long customerId;
+    private Long animalTypeId;  // camelCase
+    @JsonProperty(value = "customerId")
+    private Long customerId;    // camelCase
 }
-

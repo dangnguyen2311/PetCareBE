@@ -2,16 +2,17 @@ package org.example.petcarebe.service;
 
 import org.example.petcarebe.dto.request.animaltype.UpdateAnimalTypeRequest;
 import org.example.petcarebe.dto.request.animaltype.CreateAnimalTypeRequest;
-import org.example.petcarebe.dto.response.AnimalTypeResponse;
+import org.example.petcarebe.dto.response.animaltype.AnimalTypeResponse;
 import org.example.petcarebe.model.AnimalType;
 import org.example.petcarebe.repository.AnimalTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AnimalTypeService {
@@ -51,6 +52,14 @@ public class AnimalTypeService {
                 message
         );
     }
+    private AnimalTypeResponse convertToResponse(AnimalType animalType) {
+        return new AnimalTypeResponse(
+                animalType.getId(),
+                animalType.getName(),
+                animalType.getDescription(),
+                ""
+        );
+    }
 
     public AnimalTypeResponse deleteAnimalType(Long id) {
         Optional<AnimalType> animalType = animalTypeRepository.findById(id);
@@ -59,6 +68,13 @@ public class AnimalTypeService {
 
         });
         return convertToResponse(animalType.get(), "Animal type deleted successfully");
+    }
+
+    public List<AnimalTypeResponse> getAnimalTypes() {
+        return animalTypeRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+
     }
 }
 

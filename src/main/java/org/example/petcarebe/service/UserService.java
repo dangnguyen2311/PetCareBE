@@ -2,7 +2,7 @@ package org.example.petcarebe.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.petcarebe.dto.request.user.CreateUserRequest;
-import org.example.petcarebe.dto.response.UserResponse;
+import org.example.petcarebe.dto.response.user.UserResponse;
 import org.example.petcarebe.model.User;
 import org.example.petcarebe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;

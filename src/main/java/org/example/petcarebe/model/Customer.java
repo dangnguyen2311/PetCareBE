@@ -3,40 +3,42 @@ package org.example.petcarebe.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "Customer")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "fullname")
     private String fullname;
 
-    @Column(nullable = false)
+    @Column(name = "phone")
     private String phone;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "gender", nullable = false)
+    private String gender;
+
+    @Column(name = "address")
     private String address;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
     @Column(name = "created_date", nullable = false)
-    private java.time.LocalDate createdDate;
+    private LocalDate createdDate;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @Column(nullable = false)
     private String status;
 
-    @OneToOne
-    @JoinColumn(name = "Userid", referencedColumnName = "id")
-    private User user;
 }

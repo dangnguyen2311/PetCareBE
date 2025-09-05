@@ -1,15 +1,19 @@
 package org.example.petcarebe.service;
 
-import org.example.petcarebe.dto.CustomerDto;
+import org.example.petcarebe.dto.request.customer.CreateCustomerRequest;
+import org.example.petcarebe.dto.request.customer.UpdateCustomerRequest;
+import org.example.petcarebe.dto.response.customer.CustomerRespone;
 import org.example.petcarebe.model.Customer;
-import org.example.petcarebe.model.User;
 import org.example.petcarebe.repository.CustomerRepository;
 import org.example.petcarebe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,73 +25,92 @@ public class CustomerService {
     @Autowired
     private UserRepository userRepository;
 
-    public CustomerDto createCustomer(CustomerDto customerDto) {
-        User user = userRepository.findById(customerDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public CustomerRespone createCustomer(CreateCustomerRequest request) {
+        Boolean isEmailExists = customerRepository.existsCustomerByEmail(request.getEmail());
+        Boolean isPhoneExists = customerRepository.existsCustomerByPhone(request.getPhone());
+        if (isEmailExists || isPhoneExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        }
 
-        Customer customer = new Customer();
-        customer.setFullname(customerDto.getFullname());
-        customer.setPhone(customerDto.getPhone());
-        customer.setEmail(customerDto.getEmail());
-        customer.setAddress(customerDto.getAddress());
-        customer.setUsername(customerDto.getUsername());
-        customer.setPassword(customerDto.getPassword());
-        customer.setCreatedDate(LocalDate.now());
-        customer.setStatus("active");
-        customer.setUser(user);
+
+        Customer customer = Customer.builder()
+                .fullname(request.getFullName())
+                .phone(request.getPhone())
+                .email(request.getEmail())
+                .address(request.getAddress())
+                .createdDate(LocalDate.now())
+                .gender(request.getGender())
+                .dateOfBirth(request.getDateOfBirth())
+                .status("ACTIVE")
+                .build();
+
 
         Customer savedCustomer = customerRepository.save(customer);
-        return convertToDto(savedCustomer);
+        return convertToResponse(savedCustomer,  "Customer created successfully");
     }
 
-    public List<CustomerDto> getAllCustomers() {
-        return customerRepository.findAll().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public List<CustomerRespone> getAllCustomers() {
+        return convertToListResponse(customerRepository.findAllByStatus(("ACTIVE")));
     }
 
-    public CustomerDto getCustomerById(Long customerId) {
+    public CustomerRespone getCustomerById(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-        return convertToDto(customer);
+        return convertToResponse(customer, "Customer found successfully");
     }
 
-    public CustomerDto updateCustomer(Long customerId, CustomerDto customerDto) {
+    public CustomerRespone updateCustomer(Long customerId, UpdateCustomerRequest request) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-        User user = userRepository.findById(customerDto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        customer.setFullname(customerDto.getFullname());
-        customer.setPhone(customerDto.getPhone());
-        customer.setEmail(customerDto.getEmail());
-        customer.setAddress(customerDto.getAddress());
-        customer.setUser(user);
+        customer.setFullname(request.getFullName());
+        customer.setAddress(request.getAddress());
+        customer.setDateOfBirth(request.getDateOfBirth());
+        customer.setGender(request.getGender());
 
         Customer updatedCustomer = customerRepository.save(customer);
-        return convertToDto(updatedCustomer);
+        return convertToResponse(updatedCustomer,  "Customer created successfully");
     }
 
     public void deleteCustomer(Long customerId) {
-        if (!customerRepository.existsById(customerId)) {
+        Optional<Customer> customerToDelete = customerRepository.findById(customerId);
+        if (customerToDelete.isEmpty()) {
             throw new RuntimeException("Customer not found");
         }
-        customerRepository.deleteById(customerId);
+
+        Customer customer = customerToDelete.get();
+        customer.setStatus("INACTIVE");
+        customerRepository.save(customer);
     }
 
-    private CustomerDto convertToDto(Customer customer) {
-        return new CustomerDto(
+    private CustomerRespone convertToResponse(Customer customer, String message) {
+        return new CustomerRespone(
                 customer.getId(),
                 customer.getFullname(),
-                customer.getPhone(),
                 customer.getEmail(),
+                customer.getPhone(),
+                customer.getGender(),
                 customer.getAddress(),
-                customer.getUsername(),
-                null, // Do not expose password
-                customer.getCreatedDate(),
+                customer.getDateOfBirth(),
                 customer.getStatus(),
-                customer.getUser().getId()
+                message
         );
     }
+
+    private CustomerRespone convertToResponse(Customer customer) {
+        return new CustomerRespone(customer.getId(),
+                customer.getFullname(),
+                customer.getEmail(),
+                customer.getPhone(),
+                customer.getGender(),
+                customer.getAddress(),
+                customer.getDateOfBirth(),
+                customer.getStatus(), "");
+    }
+
+    private List<CustomerRespone> convertToListResponse(List<Customer> customerList) {
+        return customerList.stream().map(this::convertToResponse).collect(Collectors.toList());
+    }
+
 }
 
