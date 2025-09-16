@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CreateCustomerRequest {
     private String fullName;
-    @Email(message = "Email can't be blank")
     private String email;
     private String phone;
     private String gender;

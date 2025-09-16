@@ -35,4 +35,7 @@ public class Discount {
 
     @Column(nullable = false)
     private String status;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted;
 }

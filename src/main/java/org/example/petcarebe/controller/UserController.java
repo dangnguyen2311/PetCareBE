@@ -39,7 +39,7 @@ public class UserController {
         } catch (RuntimeException e) {
             System.out.println("Error creating user: " + e.getMessage());
             return ResponseEntity.badRequest()
-                .body(new UserResponse(null, null, null, e.getMessage()));
+                .body(new UserResponse(null, null, null,false, null, e.getMessage()));
         }
     }
 

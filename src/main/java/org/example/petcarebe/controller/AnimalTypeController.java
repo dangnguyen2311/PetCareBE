@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/animal-types")
+@RequestMapping("/api/user/v1/animal-types")
 public class AnimalTypeController {
 
     @Autowired

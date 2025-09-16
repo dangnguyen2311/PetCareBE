@@ -20,4 +20,10 @@ public class ClinicRoom {
 
     @Column(nullable = false)
     private String status;
+
+    @Column(name = "isDeleted")
+    private Boolean isDeleted;
+
+    @Column(name = "address")
+    private String address;
 }

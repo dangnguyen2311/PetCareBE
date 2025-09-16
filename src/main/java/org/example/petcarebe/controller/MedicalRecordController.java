@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/medical-records")
+@RequestMapping("/api/user/v1/medical-records")
 public class MedicalRecordController {
     // Your controller methods will go here
 

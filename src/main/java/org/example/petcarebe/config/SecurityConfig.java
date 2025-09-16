@@ -5,6 +5,8 @@ import org.example.petcarebe.filter.JwtAuthenticationFilter;
 import org.example.petcarebe.security.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -56,13 +58,19 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/user/**").permitAll()
+
+                        // AnimalType endpoints authorization
+                        .requestMatchers(HttpMethod.POST, "/api/animal-types/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/animal-types/**").hasRole("ADMIN")
+
                         .requestMatchers("/actuator/health").permitAll()
 
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // User endpoints
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+                        // Example for multiple roles
+                        .requestMatchers("/api/pets/**").hasAnyRole("USER", "DOCTOR", "ADMIN")
 
                         // All other requests need authentication
                         .anyRequest().authenticated()

@@ -20,13 +20,16 @@ public class Customer {
     @Column(name = "fullname")
     private String fullname;
 
+    @Column(name = "client_id")
+    private String clientId;
+
     @Column(name = "phone")
     private String phone;
 
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private String gender;
 
     @Column(name = "address")

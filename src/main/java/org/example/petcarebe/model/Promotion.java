@@ -29,4 +29,7 @@ public class Promotion {
 
     @Column(name = "status", nullable = false)
     private String status;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted;
 }

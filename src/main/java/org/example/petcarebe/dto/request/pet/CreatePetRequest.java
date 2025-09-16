@@ -15,4 +15,5 @@ public class CreatePetRequest {
     private Long animalTypeId;  // camelCase
     @JsonProperty(value = "customerId")
     private Long customerId;    // camelCase
+    private String clientId;
 }

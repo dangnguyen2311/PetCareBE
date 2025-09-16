@@ -25,4 +25,8 @@ public class Medicine {
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted;
+
+    @OneToOne
+    @JoinColumn(name = "inventory_object_id")
+    private InventoryObject inventoryObject;
 }

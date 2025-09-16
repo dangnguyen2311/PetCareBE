@@ -32,7 +32,7 @@ public class Product {
     private String supplier;
 
     @Column(name = "is_active", nullable = false)
-    private Integer isActive;
+    private Boolean isActive;
 
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
@@ -42,4 +42,8 @@ public class Product {
 
     @Column(name = "imgUrl")
     private String imgUrl;
+
+    @OneToOne
+    @JoinColumn(name = "inventory_object_id")
+    private InventoryObject inventoryObject;
 }

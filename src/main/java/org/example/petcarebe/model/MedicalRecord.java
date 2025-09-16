@@ -15,13 +15,13 @@ public class MedicalRecord {
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 
-    @Column(name = "updated_date", nullable = false)
+    @Column(name = "updated_date")
     private LocalDate updatedDate;
 
-    @Column(name = "summary", nullable = false)
+    @Column(name = "summary")
     private String summary;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Petid" )
     private Pet pet;
 }

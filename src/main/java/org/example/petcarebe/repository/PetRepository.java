@@ -23,5 +23,7 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     void deletePet(@Param("petId") Long petId);
 
     List<Pet> findAllByIsDeleted(Boolean isDeleted, Sort sort);
+
+    List<Pet> findByCustomer_ClientId(String customerClientId);
 }
 

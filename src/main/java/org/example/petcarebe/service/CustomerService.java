@@ -59,6 +59,12 @@ public class CustomerService {
         return convertToResponse(customer, "Customer found successfully");
     }
 
+    public CustomerRespone getCustomerByClientId(String clientId) {
+        Customer customer = customerRepository.findByClientId(clientId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        return convertToResponse(customer, "Customer found successfully");
+    }
+
     public CustomerRespone updateCustomer(Long customerId, UpdateCustomerRequest request) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -67,6 +73,27 @@ public class CustomerService {
         customer.setAddress(request.getAddress());
         customer.setDateOfBirth(request.getDateOfBirth());
         customer.setGender(request.getGender());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+        customer.setClientId(request.getClientId());
+        customer.setStatus("ACTIVE");
+
+        Customer updatedCustomer = customerRepository.save(customer);
+        return convertToResponse(updatedCustomer,  "Customer created successfully");
+    }
+
+    public CustomerRespone updateCustomerByClientId(String clientId, UpdateCustomerRequest request) {
+        Customer customer = customerRepository.findByClientId(clientId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        customer.setFullname(request.getFullName());
+        customer.setAddress(request.getAddress());
+        customer.setDateOfBirth(request.getDateOfBirth());
+        customer.setGender(request.getGender());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+        customer.setClientId(request.getClientId());
+        customer.setStatus("ACTIVE");
 
         Customer updatedCustomer = customerRepository.save(customer);
         return convertToResponse(updatedCustomer,  "Customer created successfully");
@@ -111,6 +138,8 @@ public class CustomerService {
     private List<CustomerRespone> convertToListResponse(List<Customer> customerList) {
         return customerList.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
+
+
 
 }
 

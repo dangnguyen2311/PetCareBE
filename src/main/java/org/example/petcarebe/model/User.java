@@ -19,7 +19,7 @@ public class User {
     private String password;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    private String role; //ADMIN, USER, DOCTOR, STAFF
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted;

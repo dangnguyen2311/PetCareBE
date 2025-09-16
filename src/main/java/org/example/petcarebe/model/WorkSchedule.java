@@ -4,6 +4,7 @@ package org.example.petcarebe.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
@@ -14,8 +15,8 @@ public class WorkSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "day_of_week", nullable = false)
-    private String dayOfWeek;
+    @Column(name = "work_date", nullable = false)
+    private LocalDate workDate;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;

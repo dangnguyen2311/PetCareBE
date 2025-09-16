@@ -10,6 +10,7 @@ import org.example.petcarebe.dto.response.pet.PetResponse;
 import org.example.petcarebe.model.Appointment;
 import org.example.petcarebe.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping("/api/user/v1/customers")
 public class CustomerController {
 
     @Autowired
@@ -41,9 +42,28 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    @PutMapping("/{customerId}")
-    public ResponseEntity<CustomerRespone> updateCustomer(@PathVariable Long customerId, @RequestBody UpdateCustomerRequest request) {
-        CustomerRespone updatedCustomer = customerService.updateCustomer(customerId, request);
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<CustomerRespone> getCustomerByClientId(@PathVariable String clientId) {
+        try{
+            CustomerRespone customer = customerService.getCustomerByClientId(clientId);
+            return ResponseEntity.ok(customer);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            CustomerRespone error =  new CustomerRespone();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+//    @PutMapping("/{customerId}")
+//    public ResponseEntity<CustomerRespone> updateCustomer(@PathVariable Long customerId, @RequestBody UpdateCustomerRequest request) {
+//        CustomerRespone updatedCustomer = customerService.updateCustomer(customerId, request);
+//        return ResponseEntity.ok(updatedCustomer);
+//    }
+
+    @PutMapping("/client/{clientId}")
+    public ResponseEntity<CustomerRespone> updateCustomer(@PathVariable String clientId, @RequestBody UpdateCustomerRequest request) {
+        CustomerRespone updatedCustomer = customerService.updateCustomerByClientId(clientId, request);
         return ResponseEntity.ok(updatedCustomer);
     }
 

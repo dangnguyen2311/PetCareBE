@@ -28,7 +28,6 @@ public class PetService {
     @Autowired
     private ImageUploadService imageUploadService;
 
-
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -41,10 +40,21 @@ public class PetService {
     @Autowired
     private PetWeightRecordRepository petWeightRecordRepository;
 
+    @Transactional
     public PetResponse createPet(CreatePetRequest request) {
-        System.out.println("createPet::::::: " +  request.getCustomerId());
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        System.out.println("createPet::::::: " +  request.getClientId());
+        Optional<Customer> customerOptional = customerRepository.findByClientId(request.getClientId());
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer;
+        if(customerOptional.isEmpty()){
+            customer = new Customer();
+            customer.setClientId(request.getClientId());
+            customer.setStatus("ACTIVE");
+            customer.setCreatedDate(LocalDate.now());
+            customerRepository.save(customer);
+        }
+        else customer = customerOptional.get();
+
         Optional<AnimalType> animalType = animalTypeRepository.findById(request.getAnimalTypeId());
 
         Pet pet = new Pet();
@@ -57,19 +67,27 @@ public class PetService {
         pet.setIsDeleted(false);
         pet.setAnimalType(animalType.orElse(null));
         pet.setCustomer(customer);
+        Pet savedPet = petRepository.save(pet);
+
+        /*
+        REMEMBER TO SAVE FIRST
+        * */
 
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setCreatedDate(LocalDate.now());
-        medicalRecord.setPet(pet);
+        medicalRecord.setPet(savedPet);
 
         medicalRecordRepository.save(medicalRecord);
-        Pet savedPet = petRepository.save(pet);
-
         return convertToResponse(savedPet);
     }
 
     public List<PetResponse> getPetsByCustomerId(Long customerId) {
         return petRepository.findByCustomerId(customerId).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+    public List<PetResponse> getPetsByClientId(String clientId) {
+        return petRepository.findByCustomer_ClientId(clientId).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
@@ -103,7 +121,7 @@ public class PetService {
         if (!petRepository.existsById(petId)) {
             throw new RuntimeException("Pet not found");
         }
-        petRepository.deleteById(petId);
+        petRepository.deletePet(petId);
     }
 
     public PetResponse updatePetImage(Long petId, MultipartFile file) {
@@ -147,10 +165,10 @@ public class PetService {
         petWeightRecord.setNotes(request.getNotes());
 
         PetWeightRecord savePetWeightRecord = petWeightRecordRepository.save(petWeightRecord);
-        return convertToResponse(savePetWeightRecord, "PetWeightRecord created");
+        return convertRecordToResponse(savePetWeightRecord, "PetWeightRecord created");
 
     }
-    private PetWeightRecordResponse convertToResponse(PetWeightRecord record, String message) {
+    private PetWeightRecordResponse convertRecordToResponse(PetWeightRecord record, String message) {
         return new PetWeightRecordResponse(
                 record.getId(),
                 record.getRecordDate(),
@@ -161,7 +179,7 @@ public class PetService {
         );
 
     }
-    private PetWeightRecordResponse convertToResponse(PetWeightRecord record) {
+    private PetWeightRecordResponse convertRecordToResponse(PetWeightRecord record) {
         return new PetWeightRecordResponse(
                 record.getId(),
                 record.getRecordDate(),
@@ -188,5 +206,7 @@ public class PetService {
 
         );
     }
+
+
 }
 

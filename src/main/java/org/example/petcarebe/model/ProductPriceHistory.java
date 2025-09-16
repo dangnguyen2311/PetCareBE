@@ -1,6 +1,7 @@
 package org.example.petcarebe.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 @Entity
 @Data
 @Table(name = "productpricehistory")
+
 public class ProductPriceHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -59,6 +59,8 @@ public class UserService {
             savedUser.getId(),
             savedUser.getUsername(),
             savedUser.getRole(),
+            savedUser.getIsDeleted(),
+            savedUser.getImgUrl(),
             "User created successfully"
         );
     }
@@ -69,6 +71,8 @@ public class UserService {
                         user.getId(),
                         user.getUsername(),
                         user.getRole(),
+                        user.getIsDeleted(),
+                        user.getImgUrl(),
                         null
                 )).toList();
     }

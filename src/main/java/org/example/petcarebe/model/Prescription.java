@@ -15,6 +15,9 @@ public class Prescription {
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 
+    @Column(name = "notes")
+    private String notes;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Invoiceid")
     private Invoice invoice;

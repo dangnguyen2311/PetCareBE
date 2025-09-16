@@ -5,9 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
@@ -18,5 +20,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Boolean existsCustomerByEmail(String email);
 
     Boolean existsCustomerByPhone(String phone);
+
+    Optional<Customer> findByIdOrClientId(Long id, String clientId);
+
+    Optional<Customer> findByClientId(String clientId);
 }
 

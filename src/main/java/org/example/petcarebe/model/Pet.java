@@ -47,4 +47,7 @@ public class Pet {
 
     @Column(name = "imgUrl")
     private String imgUrl;
+
+    @Column(name = "isNeuteredOrSpayed")
+    private Boolean isNeuteredOrSpayed;
 }

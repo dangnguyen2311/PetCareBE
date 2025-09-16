@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RestController("/api/v1/user/pets")
+@RestController("/api/user/pets")
 public class PetUserController {
     @Autowired
     private PetService petService;
