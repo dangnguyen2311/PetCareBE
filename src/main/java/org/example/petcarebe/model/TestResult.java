@@ -18,6 +18,9 @@ public class TestResult {
     @Column(name = "result", nullable = false)
     private String result;
 
+    @Column(name = "status", nullable = false)
+    private String status;
+
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 

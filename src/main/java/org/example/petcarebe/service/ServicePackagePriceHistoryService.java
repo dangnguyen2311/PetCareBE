@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ServicePackagePriceHistoryService {
@@ -35,12 +37,16 @@ public class ServicePackagePriceHistoryService {
         return convertToResponse(savedServicePackagePriceHistory);
 
     }
+    public List<ServicePackagePriceHistoryResponse> getAllServicePackagePriceHistories() {
+        List<ServicePackagePriceHistory> responses = servicePackagePriceHistoryRepository.findAll();
+        return responses.stream().map(this::convertToResponse).toList();
+    }
     private ServicePackagePriceHistoryResponse convertToResponse(ServicePackagePriceHistory servicePackagePriceHistory) {
         return ServicePackagePriceHistoryResponse.builder()
                 .id(servicePackagePriceHistory.getId())
-                .servicePackageId(servicePackagePriceHistory.getServicePackage().getId())
-                .servicePackageName(servicePackagePriceHistory.getServicePackage().getName())
-                .servicePackageDescription(servicePackagePriceHistory.getServicePackage().getDescription())
+                .servicePackageId(servicePackagePriceHistory.getServicePackage() != null ? servicePackagePriceHistory.getServicePackage().getId() : null)
+                .servicePackageName(servicePackagePriceHistory.getServicePackage() != null ? servicePackagePriceHistory.getServicePackage().getName() : null)
+                .servicePackageDescription(servicePackagePriceHistory.getServicePackage() != null ? servicePackagePriceHistory.getServicePackage().getDescription() : null)
                 .startDate(servicePackagePriceHistory.getStartDate())
                 .endDate(servicePackagePriceHistory.getEndDate())
                 .status(servicePackagePriceHistory.getStatus())
@@ -51,9 +57,9 @@ public class ServicePackagePriceHistoryService {
     private ServicePackagePriceHistoryResponse convertToResponse(ServicePackagePriceHistory servicePackagePriceHistory, String message) {
         return ServicePackagePriceHistoryResponse.builder()
                 .id(servicePackagePriceHistory.getId())
-                .servicePackageId(servicePackagePriceHistory.getServicePackage().getId())
-                .servicePackageName(servicePackagePriceHistory.getServicePackage().getName())
-                .servicePackageDescription(servicePackagePriceHistory.getServicePackage().getDescription())
+                .servicePackageId(servicePackagePriceHistory.getServicePackage() != null ? servicePackagePriceHistory.getServicePackage().getId() : null)
+                .servicePackageName(servicePackagePriceHistory.getServicePackage() != null ? servicePackagePriceHistory.getServicePackage().getName() : null)
+                .servicePackageDescription(servicePackagePriceHistory.getServicePackage() != null ? servicePackagePriceHistory.getServicePackage().getDescription() : null)
                 .startDate(servicePackagePriceHistory.getStartDate())
                 .endDate(servicePackagePriceHistory.getEndDate())
                 .status(servicePackagePriceHistory.getStatus())
@@ -61,4 +67,6 @@ public class ServicePackagePriceHistoryService {
                 .message(message)
                 .build();
     }
+
+
 }

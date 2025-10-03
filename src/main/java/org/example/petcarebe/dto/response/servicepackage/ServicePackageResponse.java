@@ -16,7 +16,6 @@ public class ServicePackageResponse {
     private String imgUrl;
     private String status;
     private Integer duration;
-    private String category;
     private LocalDate createdDate;
     private LocalDate updatedAt;
 }

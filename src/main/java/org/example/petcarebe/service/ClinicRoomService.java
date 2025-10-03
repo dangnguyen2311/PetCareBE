@@ -21,15 +21,16 @@ public class ClinicRoomService {
         ClinicRoom clinicRoom = new ClinicRoom();
         clinicRoom.setName(request.getName());
         clinicRoom.setType(request.getType());
-        clinicRoom.setStatus(request.getStatus());
+        clinicRoom.setStatus("ACTIVE");
         clinicRoom.setIsDeleted(false);
+        clinicRoom.setAddress(request.getAddress());
 
         ClinicRoom savedClinicRoom = clinicRoomRepository.save(clinicRoom);
         return convertToResponse(savedClinicRoom);
     }
 
     public List<ClinicRoomResponse> getAllClinicRooms() {
-        return clinicRoomRepository.findAll().stream()
+        return clinicRoomRepository.findAllByIsDeleted(false).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
@@ -56,6 +57,7 @@ public class ClinicRoomService {
         ClinicRoom clinicRoom = clinicRoomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ClinicRoom not found with id: " + id));
         clinicRoom.setIsDeleted(true);
+        clinicRoom.setType("INACTIVE");
         clinicRoomRepository.save(clinicRoom);
     }
 
@@ -64,7 +66,8 @@ public class ClinicRoomService {
                 clinicRoom.getId(),
                 clinicRoom.getName(),
                 clinicRoom.getType(),
-                clinicRoom.getStatus()
+                clinicRoom.getStatus(),
+                clinicRoom.getAddress()
         );
     }
 }

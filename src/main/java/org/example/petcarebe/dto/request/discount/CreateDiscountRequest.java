@@ -8,6 +8,7 @@ public class CreateDiscountRequest {
     private String code;
     private String description;
     private Double value;
+    private String type;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Double maxAmount;

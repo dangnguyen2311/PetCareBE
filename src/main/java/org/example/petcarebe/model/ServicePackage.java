@@ -30,7 +30,6 @@ public class ServicePackage {
     @Column(name = "duration")
     private Integer duration;
 
-    private String category;
 
     @Column(name = "created_at")
     private LocalDate createdDate;

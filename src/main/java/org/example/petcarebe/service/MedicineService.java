@@ -4,13 +4,16 @@ import org.example.petcarebe.dto.request.medicine.CreateMedicineRequest;
 import org.example.petcarebe.dto.request.medicine.UpdateMedicineRequest;
 import org.example.petcarebe.dto.response.medicine.MedicineResponse;
 import org.example.petcarebe.enums.InventoryObjectType;
+import org.example.petcarebe.model.InventoryItem;
 import org.example.petcarebe.model.InventoryObject;
 import org.example.petcarebe.model.Medicine;
+import org.example.petcarebe.repository.InventoryItemRepository;
 import org.example.petcarebe.repository.InventoryObjectRepository;
 import org.example.petcarebe.repository.MedicineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +26,9 @@ public class MedicineService {
     @Autowired
     private InventoryObjectRepository inventoryObjectRepository;
 
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+
     public MedicineResponse createMedicine(CreateMedicineRequest request) {
         // tạo thuốc kèm tạo object trong kho InventoryObject, sau đó tạo InventoryItem sau
         InventoryObject  inventoryObject = new InventoryObject();
@@ -30,6 +36,15 @@ public class MedicineService {
         inventoryObject.setType(InventoryObjectType.MEDICINE);
         inventoryObject.setDescription(request.getDescription());
         InventoryObject savedInventoryObject = inventoryObjectRepository.save(inventoryObject);
+        InventoryItem inventoryItem = new InventoryItem();
+        inventoryItem.setQuantity(0);
+        inventoryItem.setName(request.getName());
+        inventoryItem.setMinQuantity(0);
+        inventoryItem.setUnit(request.getUnit());
+        inventoryItem.setCreatedAt(LocalDateTime.now());
+        inventoryItem.setUpdatedAt(LocalDateTime.now());
+        inventoryItem.setInventoryObject(savedInventoryObject);
+        InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItem);
 
         Medicine medicine = new Medicine();
         medicine.setName(request.getName());
@@ -44,7 +59,7 @@ public class MedicineService {
     }
 
     public List<MedicineResponse> getAllMedicines() {
-        return medicineRepository.findAll().stream()
+        return medicineRepository.findAllByIsDeleted(false).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }

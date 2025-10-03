@@ -2,6 +2,8 @@ package org.example.petcarebe.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.petcarebe.enums.InvoiceStatus;
+
 import java.time.LocalDate;
 
 @Entity
@@ -15,26 +17,38 @@ public class Invoice {
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 
-    @Column(name = "total_amount", nullable = false)
+    @Column(name = "customerName")
+    private String customerName;
+
+    @Column(name = "customerPhone")
+    private String customerPhone;
+
+    @Column(name = "notes")
+    private String notes;
+
+    @Column(name = "total_amount")
     private Double totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status = Status.UNPAID;
+    private InvoiceStatus status =  InvoiceStatus.DRAFT;
 
-    @Column(name = "total_discount_amount", nullable = false)
+    @Column(name = "total_discount_amount")
     private Double totalDiscountAmount;
 
-    @Column(name = "final_amount", nullable = false)
+    @Column(name = "final_amount")
     private Double finalAmount;
 
+    @Column(name = "tax_total_amount")
+    private Double taxTotalAmount;
+
     @ManyToOne
-    @JoinColumn(name = "Staffid", nullable = false)
+    @JoinColumn(name = "Staffid")
     private Staff staff;
 
     @ManyToOne
-    @JoinColumn(name = "Customerid", nullable = false)
-    private Customer customerId;
+    @JoinColumn(name = "Customerid")
+    private Customer customer;
 
     public enum Status {
         UNPAID, PAID, CANCELLED

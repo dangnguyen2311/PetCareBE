@@ -16,4 +16,5 @@ public class UpdateAppointmentRequest {
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
     private String notes;
+    private LocalDate requestDate;
 }

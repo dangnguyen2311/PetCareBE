@@ -7,9 +7,11 @@ import org.example.petcarebe.model.ProductPriceHistory;
 import org.example.petcarebe.repository.ProductPriceHistoryRepository;
 import org.example.petcarebe.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ProductPriceHistoryService {
@@ -37,12 +39,17 @@ public class ProductPriceHistoryService {
 
 
     }
+    public List<ProductPriceHistoryResponse> getAllProductPriceHistory() {
+        List<ProductPriceHistory> productPriceHistoryList = productPriceHistoryRepository.findAll(Sort.by(Sort.Direction.ASC, "price"));
+        return productPriceHistoryList.stream().map(this::convertToResponse)
+                .toList();
+    }
 
     private ProductPriceHistoryResponse convertToResponse(ProductPriceHistory productPriceHistory) {
         return ProductPriceHistoryResponse.builder()
                 .id(productPriceHistory.getId())
-                .productId(productPriceHistory.getProduct().getId())
-                .productName(productPriceHistory.getProduct().getName())
+                .productId(productPriceHistory.getProduct() != null ? productPriceHistory.getProduct().getId() : null)
+                .productName(productPriceHistory.getProduct() != null ? productPriceHistory.getProduct().getName() : null)
                 .price(productPriceHistory.getPrice())
                 .startDate(productPriceHistory.getStartDate())
                 .endDate(productPriceHistory.getEndDate())
@@ -53,8 +60,8 @@ public class ProductPriceHistoryService {
     private ProductPriceHistoryResponse convertToResponse(ProductPriceHistory productPriceHistory, String message) {
         return ProductPriceHistoryResponse.builder()
                 .id(productPriceHistory.getId())
-                .productId(productPriceHistory.getProduct().getId())
-                .productName(productPriceHistory.getProduct().getName())
+                .productId(productPriceHistory.getProduct() != null ? productPriceHistory.getProduct().getId() : null)
+                .productName(productPriceHistory.getProduct() != null ? productPriceHistory.getProduct().getName() : null)
                 .price(productPriceHistory.getPrice())
                 .startDate(productPriceHistory.getStartDate())
                 .endDate(productPriceHistory.getEndDate())
@@ -62,4 +69,6 @@ public class ProductPriceHistoryService {
                 .message(message)
                 .build();
     }
+
+
 }

@@ -11,6 +11,8 @@ import org.example.petcarebe.repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @org.springframework.stereotype.Service
 public class ServicePriceHistoryService {
@@ -35,12 +37,17 @@ public class ServicePriceHistoryService {
 
     }
 
+    public List<ServicePriceHistoryResponse> getAllServicePriceHistory() {
+        List<ServicePriceHistory> responses = servicePriceHistoryRepository.findAll();
+        return responses.stream().map(this::convertToResponse).toList();
+    }
+
     private ServicePriceHistoryResponse convertToResponse(ServicePriceHistory servicePriceHistory) {
         return ServicePriceHistoryResponse.builder()
                 .id(servicePriceHistory.getId())
-                .serviceId(servicePriceHistory.getService().getId())
-                .serviceName(servicePriceHistory.getService().getName())
-                .serviceDescription(servicePriceHistory.getService().getDescription())
+                .serviceId(servicePriceHistory.getService() != null ? servicePriceHistory.getService().getId() : null)
+                .serviceName(servicePriceHistory.getService() != null ? servicePriceHistory.getService().getName() : null)
+                .serviceDescription(servicePriceHistory.getService() != null ? servicePriceHistory.getService().getDescription() : null)
                 .price(servicePriceHistory.getPrice())
                 .startDate(servicePriceHistory.getStartDate())
                 .endDate(servicePriceHistory.getEndDate())
@@ -51,9 +58,9 @@ public class ServicePriceHistoryService {
     private ServicePriceHistoryResponse convertToResponse(ServicePriceHistory servicePriceHistory, String message) {
         return ServicePriceHistoryResponse.builder()
                 .id(servicePriceHistory.getId())
-                .serviceId(servicePriceHistory.getService().getId())
-                .serviceName(servicePriceHistory.getService().getName())
-                .serviceDescription(servicePriceHistory.getService().getDescription())
+                .serviceId(servicePriceHistory.getService() != null ? servicePriceHistory.getService().getId() : null)
+                .serviceName(servicePriceHistory.getService() != null ? servicePriceHistory.getService().getName() : null)
+                .serviceDescription(servicePriceHistory.getService() != null ? servicePriceHistory.getService().getDescription() : null)
                 .price(servicePriceHistory.getPrice())
                 .startDate(servicePriceHistory.getStartDate())
                 .endDate(servicePriceHistory.getEndDate())
@@ -61,4 +68,6 @@ public class ServicePriceHistoryService {
                 .message(message)
                 .build();
     }
+
+
 }

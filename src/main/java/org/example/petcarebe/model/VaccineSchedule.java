@@ -19,6 +19,7 @@ public class VaccineSchedule {
     @Column(name = "status", nullable = false)
     private String status;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Vaccineid")
     private Vaccine vaccine;

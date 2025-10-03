@@ -6,7 +6,7 @@ import lombok.Data;
 @Entity
 @Table(name = "Servicepackageininvoice")
 @Data
-public class ServicePackageInInvoice {
+public class ServicePackageInInvoice extends AbstractInvoiceItem{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,6 +16,12 @@ public class ServicePackageInInvoice {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+
+    @Column(name = "tax_percent", nullable = false)
+    private Double taxPercent;
+
+    @Column(name = "promotion_amount", nullable = false)
+    private Double promotionAmount;
 
     @Column(name = "notes")
     private String notes;

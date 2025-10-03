@@ -2,7 +2,10 @@ package org.example.petcarebe.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.petcarebe.enums.StockMovementType;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -14,24 +17,28 @@ public class StockMovement {
     private Long id;
 
     @Column(name = "movement_type")
-    private String movementType;
+    @Enumerated(EnumType.STRING)
+    private StockMovementType movementType;
 
     @Column(name = "quantity")
     private Integer quantity;
 
+    @Column(name = "price")
+    private Double price;
+
     @Column(name = "movement_date")
-    private Date movementDate;
+    private LocalDateTime movementDate;
 
     @Column(name = "notes")
     private String notes;
 
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "updated_at")
-    private Date updatedAt;
+    private LocalDate updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "InventoryItemid")
     private InventoryItem inventoryItem;
 }

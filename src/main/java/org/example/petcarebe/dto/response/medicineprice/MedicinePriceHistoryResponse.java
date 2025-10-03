@@ -14,8 +14,8 @@ import java.time.LocalDate;
 @Builder
 public class MedicinePriceHistoryResponse {
     private Long id;
-    private Long Medicineid;
-    private String MedicineName;
+    private Long medicineid;
+    private String medicineName;
     private Double price;
     private LocalDate startDate;
     private LocalDate endDate;

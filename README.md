@@ -494,20 +494,31 @@ Cảm ơn tất cả những người đã đóng góp cho dự án này!
 - **Test Coverage**: 85%+
 - **Performance**: <200ms average response time
 
-### 🌟 Features Highlights
+[//]: # (### 🌟 Features Highlights)
 
-#### 🔥 Hot Features
-- **Real-time Dashboard** với live updates
-- **Advanced Search** với full-text search
-- **Comprehensive Statistics** với 20+ metrics
-- **Mobile-responsive APIs** ready for mobile apps
-- **Scalable Architecture** hỗ trợ high traffic
+[//]: # ()
+[//]: # (#### 🔥 Hot Features)
 
-#### 🆕 Latest Updates
-- **Enhanced Security** với rate limiting
-- **Improved Performance** với database optimization
-- **Better Error Handling** với detailed error messages
-- **Extended API Documentation** với Swagger integration
+[//]: # (- **Real-time Dashboard** với live updates)
+
+[//]: # (- **Advanced Search** với full-text search)
+
+[//]: # (- **Comprehensive Statistics** với 20+ metrics)
+
+[//]: # (- **Mobile-responsive APIs** ready for mobile apps)
+
+[//]: # (- **Scalable Architecture** hỗ trợ high traffic)
+
+[//]: # ()
+[//]: # (#### 🆕 Latest Updates)
+
+[//]: # (- **Enhanced Security** với rate limiting)
+
+[//]: # (- **Improved Performance** với database optimization)
+
+[//]: # (- **Better Error Handling** với detailed error messages)
+
+[//]: # (- **Extended API Documentation** với Swagger integration)
 
 ## 📞 Liên hệ
 

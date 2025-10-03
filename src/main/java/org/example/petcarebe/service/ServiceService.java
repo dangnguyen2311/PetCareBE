@@ -34,7 +34,7 @@ public class ServiceService {
     }
 
     public List<ServiceResponse> getAllServices() {
-        return serviceRepository.findAll().stream()
+        return serviceRepository.findAllByIsDeleted(false).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }

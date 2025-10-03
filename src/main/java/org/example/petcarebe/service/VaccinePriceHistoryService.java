@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class VaccinePriceHistoryService {
@@ -34,12 +35,17 @@ public class VaccinePriceHistoryService {
         return convertToResponse(savedVaccinePriceHistory);
     }
 
+    public List<VaccinePriceHistoryResponse> getAllVaccinePriceHistory() {
+        List<VaccinePriceHistory> responses = vaccinePriceHistoryRepository.findAll();
+        return responses.stream().map(this::convertToResponse).toList();
+    }
+
     private VaccinePriceHistoryResponse convertToResponse(VaccinePriceHistory vaccinePriceHistory) {
         return VaccinePriceHistoryResponse.builder()
                 .id(vaccinePriceHistory.getId())
-                .vaccineId(vaccinePriceHistory.getVaccine().getId())
-                .vaccineName(vaccinePriceHistory.getVaccine().getName())
-                .vaccineManufacturer(vaccinePriceHistory.getVaccine().getManufacturer())
+                .vaccineId(vaccinePriceHistory.getVaccine() != null ?  vaccinePriceHistory.getVaccine().getId() : null)
+                .vaccineName(vaccinePriceHistory.getVaccine() != null ? vaccinePriceHistory.getVaccine().getName() : null)
+                .vaccineManufacturer(vaccinePriceHistory.getVaccine() != null ? vaccinePriceHistory.getVaccine().getManufacturer() : null)
                 .price(vaccinePriceHistory.getPrice())
                 .startDate(vaccinePriceHistory.getStartDate())
                 .endDate(vaccinePriceHistory.getEndDate())
@@ -50,8 +56,9 @@ public class VaccinePriceHistoryService {
     private VaccinePriceHistoryResponse convertToResponse(VaccinePriceHistory vaccinePriceHistory, String message) {
         return VaccinePriceHistoryResponse.builder()
                 .id(vaccinePriceHistory.getId())
-                .vaccineId(vaccinePriceHistory.getVaccine().getId())
-                .vaccineName(vaccinePriceHistory.getVaccine().getName())
+                .vaccineId(vaccinePriceHistory.getVaccine() != null ?  vaccinePriceHistory.getVaccine().getId() : null)
+                .vaccineName(vaccinePriceHistory.getVaccine() != null ? vaccinePriceHistory.getVaccine().getName() : null)
+                .vaccineManufacturer(vaccinePriceHistory.getVaccine() != null ? vaccinePriceHistory.getVaccine().getManufacturer() : null)
                 .vaccineManufacturer(vaccinePriceHistory.getVaccine().getManufacturer())
                 .price(vaccinePriceHistory.getPrice())
                 .startDate(vaccinePriceHistory.getStartDate())
@@ -60,4 +67,6 @@ public class VaccinePriceHistoryService {
                 .message(message)
                 .build();
     }
+
+
 }

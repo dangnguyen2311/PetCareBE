@@ -15,7 +15,7 @@ public class Promotion {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "type", nullable = false) // PERCENT, CASH
     private String type;
 
     @Column(name = "value", nullable = false)

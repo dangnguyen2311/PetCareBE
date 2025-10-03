@@ -7,11 +7,12 @@ import org.example.petcarebe.model.Promotion;
 import org.example.petcarebe.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class PromotionService {
 
     @Autowired

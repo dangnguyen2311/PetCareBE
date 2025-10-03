@@ -18,6 +18,9 @@ public class Discount {
     @Column(nullable = false)
     private String description;
 
+    @Column(name = "type", nullable = false) //PERCENT, CASH
+    private String type;
+
     @Column(nullable = false)
     private Double value;
 
@@ -36,6 +39,6 @@ public class Discount {
     @Column(nullable = false)
     private String status;
 
-    @Column(name = "isDeleted", nullable = false)
+    @Column(name = "isDeleted")
     private Boolean isDeleted;
 }

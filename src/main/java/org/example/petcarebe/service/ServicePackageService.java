@@ -25,7 +25,6 @@ public class ServicePackageService {
         servicePackage.setImgUrl(request.getImgUrl());
         servicePackage.setStatus(request.getStatus());
         servicePackage.setDuration(request.getDuration());
-        servicePackage.setCategory(request.getCategory());
         servicePackage.setCreatedDate(LocalDate.now());
         servicePackage.setIsDeleted(false);
 
@@ -34,7 +33,7 @@ public class ServicePackageService {
     }
 
     public List<ServicePackageResponse> getAllServicePackages() {
-        return servicePackageRepository.findAll().stream()
+        return servicePackageRepository.findAllByIsDeleted(false).stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
@@ -54,7 +53,6 @@ public class ServicePackageService {
         servicePackage.setImgUrl(request.getImgUrl());
         servicePackage.setStatus(request.getStatus());
         servicePackage.setDuration(request.getDuration());
-        servicePackage.setCategory(request.getCategory());
         servicePackage.setUpdatedAt(LocalDate.now());
 
         ServicePackage updatedServicePackage = servicePackageRepository.save(servicePackage);
@@ -76,7 +74,6 @@ public class ServicePackageService {
                 servicePackage.getImgUrl(),
                 servicePackage.getStatus(),
                 servicePackage.getDuration(),
-                servicePackage.getCategory(),
                 servicePackage.getCreatedDate(),
                 servicePackage.getUpdatedAt()
         );

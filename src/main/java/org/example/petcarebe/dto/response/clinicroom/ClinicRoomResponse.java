@@ -12,5 +12,6 @@ public class ClinicRoomResponse {
     private String name;
     private String type;
     private String status;
+    private String address;
 }
 

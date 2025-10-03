@@ -22,6 +22,9 @@ public class VaccinationRecord {
     @Column(name = "notes")
     private String notes;
 
+    @Column(name = "status", nullable = false)
+    private String status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Doctorid", nullable = false)
     private Doctor doctor;

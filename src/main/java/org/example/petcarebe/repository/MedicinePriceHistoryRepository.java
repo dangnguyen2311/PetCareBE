@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MedicinePriceHistoryRepository extends JpaRepository<MedicinePriceHistory,Long> {
@@ -19,4 +20,6 @@ public interface MedicinePriceHistoryRepository extends JpaRepository<MedicinePr
     @Transactional
     @Query("UPDATE MedicinePriceHistory m SET m.status = 'INACTIVE', m.endDate = :endDate WHERE m.status = 'ACTIVE'")
     void deactiveAllActiveRecord(@Param("endDate") LocalDate endDate);
+
+    Optional<MedicinePriceHistory> findByStatus(String status);
 }

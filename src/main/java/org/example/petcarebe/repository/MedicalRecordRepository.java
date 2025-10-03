@@ -10,5 +10,7 @@ import java.util.Optional;
 @Repository
 public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Long> {
     Optional<MedicalRecord> findByPet(Pet pet);
+
+    MedicalRecord findByPet_Id(Long petId);
 }
 

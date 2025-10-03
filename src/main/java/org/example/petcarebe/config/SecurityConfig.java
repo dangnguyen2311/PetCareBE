@@ -57,7 +57,18 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/ws/**", "/ws-native/**", "/ws-raw/**").permitAll() // mở WS endpoints
+                        .requestMatchers("/app/**").permitAll()                  // app-level STOMP
+                        .requestMatchers("/topic/**", "/queue/**", "/user/**").permitAll()
+                        .requestMatchers("/stomp/**").permitAll()
+
+                        // Swagger UI endpoints
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-resources/**").permitAll()
+                        .requestMatchers("/webjars/**").permitAll()
+
                         .requestMatchers("/api/user/**").permitAll()
 
                         // AnimalType endpoints authorization
@@ -65,6 +76,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/animal-types/**").hasRole("ADMIN")
 
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/favicon.ico").permitAll()
 
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

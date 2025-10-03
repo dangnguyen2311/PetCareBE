@@ -52,7 +52,7 @@ public class MedicalRecordService {
                 medicalRecord.getUpdatedDate(),
                 medicalRecord.getSummary(),
                 message,
-                medicalRecord.getPet().getId()
+                medicalRecord.getPet() != null ? medicalRecord.getPet().getId() : null
         );
     }
 
@@ -63,7 +63,7 @@ public class MedicalRecordService {
                 medicalRecord.getUpdatedDate(),
                 medicalRecord.getSummary(),
                 "",
-                medicalRecord.getPet().getId()
+                medicalRecord.getPet() != null ? medicalRecord.getPet().getId() : null
 
         );
     }

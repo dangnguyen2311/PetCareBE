@@ -20,6 +20,7 @@ public class DiscountService {
     public DiscountResponse createDiscount(CreateDiscountRequest request) {
         Discount discount = new Discount();
         discount.setCode(request.getCode());
+        discount.setType(request.getType());
         discount.setDescription(request.getDescription());
         discount.setValue(request.getValue());
         discount.setStartDate(request.getStartDate());
@@ -70,17 +71,34 @@ public class DiscountService {
     }
 
     private DiscountResponse convertToResponse(Discount discount) {
-        return new DiscountResponse(
-                discount.getId(),
-                discount.getCode(),
-                discount.getDescription(),
-                discount.getValue(),
-                discount.getStartDate(),
-                discount.getEndDate(),
-                discount.getMaxAmount(),
-                discount.getMinAmount(),
-                discount.getStatus()
-        );
+        return DiscountResponse.builder()
+                .id(discount.getId())
+                .code(discount.getCode())
+                .description(discount.getDescription())
+                .type(discount.getType())
+                .value(discount.getValue())
+                .startDate(discount.getStartDate())
+                .endDate(discount.getEndDate())
+                .maxAmount(discount.getMaxAmount())
+                .minAmount(discount.getMinAmount())
+                .status(discount.getStatus())
+                .message("")
+                .build();
+    }
+    private DiscountResponse convertToResponse(Discount discount, String message) {
+        return DiscountResponse.builder()
+                .id(discount.getId())
+                .code(discount.getCode())
+                .description(discount.getDescription())
+                .type(discount.getType())
+                .value(discount.getValue())
+                .startDate(discount.getStartDate())
+                .endDate(discount.getEndDate())
+                .maxAmount(discount.getMaxAmount())
+                .minAmount(discount.getMinAmount())
+                .status(discount.getStatus())
+                .message(message)
+                .build();
     }
 }
 

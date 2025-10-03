@@ -1,9 +1,10 @@
 package org.example.petcarebe.service;
 
-import org.example.petcarebe.dto.request.pet.CreatePetRequest;
-import org.example.petcarebe.dto.request.pet.CreatePetWeightRecordRequest;
-import org.example.petcarebe.dto.request.pet.UpdatePetRequest;
+import org.example.petcarebe.dto.request.pet.*;
 
+import org.example.petcarebe.dto.response.activity.DailyActivityResponse;
+import org.example.petcarebe.dto.response.pet.PetFoodRecordResponse;
+import org.example.petcarebe.dto.response.pet.PetImageRecordResponse;
 import org.example.petcarebe.dto.response.pet.PetResponse;
 import org.example.petcarebe.dto.response.pet.PetWeightRecordResponse;
 import org.example.petcarebe.model.*;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +41,12 @@ public class PetService {
 
     @Autowired
     private PetWeightRecordRepository petWeightRecordRepository;
+
+    @Autowired
+    private PetFoodRecordRepository petFoodRecordRepository;
+
+    @Autowired
+    private PetImageRecordRepository petImageRecordRepository;
 
     @Transactional
     public PetResponse createPet(CreatePetRequest request) {
@@ -69,9 +77,9 @@ public class PetService {
         pet.setCustomer(customer);
         Pet savedPet = petRepository.save(pet);
 
-        /*
-        REMEMBER TO SAVE FIRST
-        * */
+        /**
+        * REMEMBER TO SAVE FIRST
+        */
 
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setCreatedDate(LocalDate.now());
@@ -121,6 +129,8 @@ public class PetService {
         if (!petRepository.existsById(petId)) {
             throw new RuntimeException("Pet not found");
         }
+        MedicalRecord medicalRecord = medicalRecordRepository.findByPet_Id(petId);
+        medicalRecordRepository.delete(medicalRecord);
         petRepository.deletePet(petId);
     }
 
@@ -160,13 +170,183 @@ public class PetService {
         }
         PetWeightRecord petWeightRecord = new PetWeightRecord();
         petWeightRecord.setWeight(request.getWeight());
-        petWeightRecord.setMedicalRecord( medicalRecordOptional.get());
-        petWeightRecord.setRecordDate(LocalDate.now());
+        petWeightRecord.setMedicalRecord(medicalRecordOptional.get());
+        petWeightRecord.setRecordDate(request.getRecordDate());
+        System.out.println("thong tin" + request.getRecordDate() + " " + request.getWeight());
         petWeightRecord.setNotes(request.getNotes());
 
         PetWeightRecord savePetWeightRecord = petWeightRecordRepository.save(petWeightRecord);
         return convertRecordToResponse(savePetWeightRecord, "PetWeightRecord created");
 
+    }
+    public PetResponse getPetById(Long petId) {
+        return convertToResponse(petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found")));
+    }
+    public PetFoodRecordResponse createPetFoodRecord(Long petId, CreatePetFoodRecordRequest request) {
+        Pet pet =  petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(pet)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+
+        PetFoodRecord petFoodRecord = new PetFoodRecord();
+        petFoodRecord.setFoodType(request.getFoodType());
+        petFoodRecord.setAmountFood(request.getAmountFood());
+        petFoodRecord.setRecordDate(request.getRecordDate());
+        petFoodRecord.setNotes(request.getNotes());
+        petFoodRecord.setMedicalRecord(medicalRecordByPet);
+
+        PetFoodRecord savePetFoodRecord = petFoodRecordRepository.save(petFoodRecord);
+        return convertRecordToResponse(savePetFoodRecord, "PetFoodRecord created");
+
+    }
+
+    public PetImageRecordResponse createPetImageRecord(Long petId, CreatePetImageRecordRequest request){
+        Pet pet =  petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(pet)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+
+        PetImageRecord petImageRecord = new PetImageRecord();
+        petImageRecord.setMedicalRecord( medicalRecordByPet);
+        petImageRecord.setRecordDate(request.getRecordDate());
+        petImageRecord.setNotes(request.getNotes());
+        petImageRecord.setImgUrl(request.getImgUrl());
+
+        PetImageRecord savedPetImageRecord = petImageRecordRepository.save(petImageRecord);
+        return convertRecordToResponse(savedPetImageRecord, "PetImageRecord created");
+    }
+
+    public List<PetFoodRecordResponse> getPetFoodRecordsByPetId(Long petId) {
+        Pet petById = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(petById)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetFoodRecord> petFoodRecordList = petFoodRecordRepository.findAllByMedicalRecord(medicalRecordByPet, Sort.by(Sort.Direction.DESC, "recordDate"));
+        return petFoodRecordList.stream()
+                .map(this::convertRecordToResponse)
+                .toList();
+    }
+    public List<PetFoodRecordResponse> getPetFoodRecordsByPetIdAndDate(Long petId, LocalDate date) {
+        Pet petById = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(petById)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetFoodRecord> petFoodRecordList;
+        if (date != null) {
+            // Lọc theo ngày
+            petFoodRecordList = petFoodRecordRepository
+                    .findAllByMedicalRecordAndRecordDate(
+                            medicalRecordByPet,
+                            date,
+                            Sort.by(Sort.Direction.DESC, "recordDate")
+                    );
+        } else {
+            // Lấy tất cả bản ghi
+            petFoodRecordList = petFoodRecordRepository
+                    .findAllByMedicalRecord(
+                            medicalRecordByPet,
+                            Sort.by(Sort.Direction.DESC, "id")
+                    );
+        }
+        return petFoodRecordList.stream()
+                .map(this::convertRecordToResponse)
+                .toList();
+    }
+
+    public List<PetWeightRecordResponse> getPetWeightRecordsByPetIdAndDate(Long petId, LocalDate date) {
+        Pet petById = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(petById)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetWeightRecord> petWeightRecordList;
+        if (date != null) {
+            // Lọc theo ngày
+            petWeightRecordList = petWeightRecordRepository
+                    .findAllByMedicalRecordAndRecordDate(
+                            medicalRecordByPet,
+                            date,
+                            Sort.by(Sort.Direction.DESC, "recordDate")
+                    );
+        } else {
+            // Lấy tất cả bản ghi
+            petWeightRecordList = petWeightRecordRepository
+                    .findAllByMedicalRecord(
+                            medicalRecordByPet,
+                            Sort.by(Sort.Direction.DESC, "id")
+                    );
+        }
+        return petWeightRecordList.stream()
+                .map(this::convertRecordToResponse)
+                .toList();
+    }
+    public List<PetImageRecordResponse> getPetImageRecordsByPetIdAndDate(Long petId, LocalDate date) {
+        Pet petById = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(petById)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetImageRecord> petImageRecordList;
+        if (date != null) {
+            // Lọc theo ngày
+            petImageRecordList = petImageRecordRepository
+                    .findAllByMedicalRecordAndRecordDate(
+                            medicalRecordByPet,
+                            date,
+                            Sort.by(Sort.Direction.DESC, "recordDate")
+                    );
+        } else {
+            // Lấy tất cả bản ghi
+            petImageRecordList = petImageRecordRepository
+                    .findAllByMedicalRecord(
+                            medicalRecordByPet,
+                            Sort.by(Sort.Direction.DESC, "id")
+                    );
+        }
+        return petImageRecordList.stream()
+                .map(this::convertRecordToResponse)
+                .toList();
+    }
+
+    public List<PetWeightRecordResponse> getPetWeightRecordsByPetId(Long petId) {
+        Pet petById = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(petById)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetWeightRecord> petWeightRecordList = petWeightRecordRepository.findAllByMedicalRecord(medicalRecordByPet, Sort.by(Sort.Direction.DESC, "recordDate"));
+        return petWeightRecordList.stream()
+                .map(this::convertRecordToResponse)
+                .toList();
+    }
+
+    public List<PetImageRecordResponse> getPetImageRecordsByPetId(Long petId) {
+        Pet petById = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecordByPet = medicalRecordRepository.findByPet(petById)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetImageRecord> petImageRecordList = petImageRecordRepository.findAllByMedicalRecord(medicalRecordByPet, Sort.by(Sort.Direction.DESC, "recordDate"));
+        return petImageRecordList.stream()
+                .map(this::convertRecordToResponse)
+                .toList();
+    }
+
+
+
+    private PetImageRecordResponse convertRecordToResponse(PetImageRecord petImageRecord) {
+        return new PetImageRecordResponse(
+                petImageRecord.getId(),
+                petImageRecord.getRecordDate(),
+                petImageRecord.getImgUrl(),
+                petImageRecord.getNotes(),
+                ""
+        );
+    }
+    private PetImageRecordResponse convertRecordToResponse(PetImageRecord petImageRecord, String message) {
+        return new PetImageRecordResponse(
+                petImageRecord.getId(),
+                petImageRecord.getRecordDate(),
+                petImageRecord.getImgUrl(),
+                petImageRecord.getNotes(),
+                message
+        );
     }
     private PetWeightRecordResponse convertRecordToResponse(PetWeightRecord record, String message) {
         return new PetWeightRecordResponse(
@@ -190,6 +370,26 @@ public class PetService {
         );
 
     }
+    private PetFoodRecordResponse convertRecordToResponse(PetFoodRecord record) {
+        return new PetFoodRecordResponse(
+                record.getId(),
+                record.getRecordDate(),
+                record.getFoodType(),
+                record.getAmountFood(),
+                record.getNotes(),
+                ""
+        );
+    }
+    private PetFoodRecordResponse convertRecordToResponse(PetFoodRecord record, String message) {
+        return new PetFoodRecordResponse(
+                record.getId(),
+                record.getRecordDate(),
+                record.getFoodType(),
+                record.getAmountFood(),
+                record.getNotes(),
+                message
+        );
+    }
 
     private PetResponse convertToResponse(Pet pet) {
         return new PetResponse(
@@ -207,6 +407,15 @@ public class PetService {
         );
     }
 
+
+    public DailyActivityResponse getDailyActivities(Long petId, LocalDate date) {
+        // Bổ sung sau
+        return new DailyActivityResponse();
+    }
+
+    public List<DailyActivityResponse> getActivitiesInRange(Long petId, LocalDate startDate, LocalDate endDate) {
+        return new ArrayList<>();
+    }
 
 }
 

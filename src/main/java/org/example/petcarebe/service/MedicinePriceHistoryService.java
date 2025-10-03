@@ -43,11 +43,16 @@ public class MedicinePriceHistoryService {
         return convertToResponse(saveMedicinePriceHistory);
     }
 
+    public List<MedicinePriceHistoryResponse> getAllMedicinePriceHistory() {
+        List<MedicinePriceHistory>  medicinePriceHistoryList = medicinePriceHistoryRepository.findAll();
+        return medicinePriceHistoryList.stream().map(this::convertToResponse).toList();
+    }
+
     private MedicinePriceHistoryResponse convertToResponse(MedicinePriceHistory medicinePriceHistory) {
         return MedicinePriceHistoryResponse.builder()
                 .id(medicinePriceHistory.getId())
-                .Medicineid(medicinePriceHistory.getMedicine().getId())
-                .MedicineName(medicinePriceHistory.getMedicine().getName())
+                .medicineid(medicinePriceHistory.getMedicine() != null ?  medicinePriceHistory.getMedicine().getId() : null)
+                .medicineName(medicinePriceHistory.getMedicine() !=  null ? medicinePriceHistory.getMedicine().getName() : null)
                 .price(medicinePriceHistory.getPrice())
                 .startDate(medicinePriceHistory.getStartDate())
                 .endDate(medicinePriceHistory.getEndDate())
@@ -59,8 +64,8 @@ public class MedicinePriceHistoryService {
     private MedicinePriceHistoryResponse convertToResponse(MedicinePriceHistory medicinePriceHistory,String message) {
         return MedicinePriceHistoryResponse.builder()
                 .id(medicinePriceHistory.getId())
-                .Medicineid(medicinePriceHistory.getMedicine().getId())
-                .MedicineName(medicinePriceHistory.getMedicine().getName())
+                .medicineid(medicinePriceHistory.getMedicine() != null ?  medicinePriceHistory.getMedicine().getId() : null)
+                .medicineName(medicinePriceHistory.getMedicine() !=  null ? medicinePriceHistory.getMedicine().getName() : null)
                 .price(medicinePriceHistory.getPrice())
                 .startDate(medicinePriceHistory.getStartDate())
                 .endDate(medicinePriceHistory.getEndDate())
@@ -68,4 +73,6 @@ public class MedicinePriceHistoryService {
                 .message(message)
                 .build();
     }
+
+
 }

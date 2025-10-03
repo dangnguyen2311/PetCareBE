@@ -2,6 +2,7 @@ package org.example.petcarebe.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.petcarebe.enums.InventoryItemType;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,10 @@ public class InventoryItem {
 
     @Column(name = "unit")
     private String unit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "inventory_type")
+    private InventoryItemType inventoryType;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
