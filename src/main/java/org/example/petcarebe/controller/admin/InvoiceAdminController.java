@@ -3,13 +3,23 @@ package org.example.petcarebe.controller.admin;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.petcarebe.dto.request.invoice.*;
+import org.example.petcarebe.dto.request.payment.ConfirmPaymentFailedRequest;
+import org.example.petcarebe.dto.request.payment.ConfirmPaymentSuccessRequest;
+import org.example.petcarebe.dto.request.payment.CreatePaymentRequest;
 import org.example.petcarebe.dto.response.invoice.*;
+import org.example.petcarebe.dto.response.payment.CreatePaymentResponse;
+import org.example.petcarebe.dto.response.payment.PaymentResponse;
+import org.example.petcarebe.enums.InvoiceStatus;
+import org.example.petcarebe.payment.PaymentRequest;
+import org.example.petcarebe.payment.PaymentService;
 import org.example.petcarebe.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,10 +68,49 @@ public class InvoiceAdminController {
         }
 
     }
-    @GetMapping("/getlist")
+
+    @GetMapping("/{invoiceId}")
+    public ResponseEntity<InvoiceResponse> getInvoice(@PathVariable("invoiceId") Long invoiceId){
+        try{
+            InvoiceResponse response = invoiceService.getInvoiceById(invoiceId);
+            return  ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (RuntimeException e) {
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        } catch (Exception e) {
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+    @GetMapping("/get-all")
     public ResponseEntity<List<InvoiceResponse>> getAllInvoices(){
         try{
             List<InvoiceResponse> response = invoiceService.getAllInvoice();
+            return  ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        }
+        catch (RuntimeException e){
+            List<InvoiceResponse> error = new ArrayList<>();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e){
+            List<InvoiceResponse> error = new ArrayList<>();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @GetMapping("/get-list")
+    public ResponseEntity<List<InvoiceResponse>> getInvoicesByStatusOrDate(
+            @RequestParam(value = "status", required = false) InvoiceStatus status,
+            @RequestParam(value = "fromDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(value = "toDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+            ){
+        try{
+            List<InvoiceResponse> response = invoiceService.getInvoicesByParam(status, fromDate, toDate);
             return  ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
         }
         catch (RuntimeException e){
@@ -126,6 +175,23 @@ public class InvoiceAdminController {
         }
     }
 
+    @GetMapping("/items/{invoiceId}")
+    public ResponseEntity<InvoiceItemsResponse> getInvoicesItemByInvoiceId(@PathVariable("invoiceId") Long invoiceId){
+        try{
+            InvoiceItemsResponse response = invoiceService.getInvoiceItems(invoiceId);
+            return  ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            InvoiceItemsResponse error = new InvoiceItemsResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e){
+            InvoiceItemsResponse error = new InvoiceItemsResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
     @PostMapping("/add-service/{invoiceId}")
     public ResponseEntity<AddServiceToInvoiceResponse> addServiceToInvoice(@PathVariable Long invoiceId, @RequestBody AddServiceToInvoiceRequest request){
         try{
@@ -163,7 +229,9 @@ public class InvoiceAdminController {
     }
 
     @PostMapping("/add-product/{invoiceId}")
-    public ResponseEntity<AddProductToInvoiceResponse> addProductToInvoice(@PathVariable Long invoiceId, @RequestBody AddProductToInvoiceRequest request){
+    public ResponseEntity<AddProductToInvoiceResponse> addProductToInvoice(
+            @PathVariable Long invoiceId,
+            @RequestBody AddProductToInvoiceRequest request){
         try{
             AddProductToInvoiceResponse response = invoiceService.addProductToInvoice(invoiceId, request);
             return  ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -199,7 +267,10 @@ public class InvoiceAdminController {
     }
 
     @PostMapping("/add-prescription/{invoiceId}")
-    public ResponseEntity<AddPrescriptionToInvoiceResponse> addVaccineToInvoice(@PathVariable Long invoiceId, @RequestBody AddPrescriptionToInvoiceRequest request){
+    public ResponseEntity<AddPrescriptionToInvoiceResponse> addPrescriptionToInvoice(
+            @PathVariable Long invoiceId,
+            @RequestBody AddPrescriptionToInvoiceRequest request
+    ){
         try{
             AddPrescriptionToInvoiceResponse response = invoiceService.addPrescriptionToInvoice(invoiceId, request);
             return  ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -216,17 +287,53 @@ public class InvoiceAdminController {
         }
     }
 
-
-    //Theem Service, ServicePackage, Discount, Product, Prescription, Vaccine V
+//    @PostMapping("/add-promotion/{invoiceId}")
+//    public ResponseEntity<AddPromotionToInvoiceResponse> addPromotionToInvoice(
+//            @PathVariable Long invoiceId,
+//            @RequestBody AddPromotionToInvoiceRequest request
+//    ){
+//        try{
+//            AddPromotionToInvoiceResponse response = invoiceService.addPromotionToInvoice(request);
+//            return  ResponseEntity.status(HttpStatus.CREATED).body(response);
+//        } catch (RuntimeException e) {
+//            AddPromotionToInvoiceResponse error = new AddPromotionToInvoiceResponse();
+//            error.setMessage(e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+//        }
+//        catch (Exception e){
+//            AddPromotionToInvoiceResponse error = new AddPromotionToInvoiceResponse();
+//            error.setMessage(e.getMessage());
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);}
+//    }
 
     //Update STatus: PENDING, PAID, CANCELED, ... Bỏ qua
+    @GetMapping("/update-status/{invoiceId}")
+    public ResponseEntity<InvoiceResponse> updateStatus(
+            @PathVariable Long invoiceId,
+            @RequestParam InvoiceStatus status
+    ){
+        try{
+            InvoiceResponse response = invoiceService.updateStatus(status, invoiceId);
+            return  ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (RuntimeException e) {
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e){
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        }
+    }
 
     //Tinh tien
     @GetMapping("/check-invoice/{invoiceId}")
     public ResponseEntity<InvoiceResponse> checkPriceInvoice(@PathVariable Long invoiceId){
         try{
             InvoiceResponse response = invoiceService.checkPriceInvoice(invoiceId);
-            return  ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return  ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (RuntimeException e) {
             InvoiceResponse error = new InvoiceResponse();
             error.setMessage(e.getMessage());
@@ -241,11 +348,31 @@ public class InvoiceAdminController {
     }
 
     //them thanh toán Payment: Xác nhận thanh toán, update Status, Hoàn tiền
+    @PostMapping("/create-payment/{invoiceId}")
+    public ResponseEntity<CreatePaymentResponse> createPayment(
+            @PathVariable Long invoiceId,
+            @RequestBody CreatePaymentRequest request
+    ){
+        try{
+            CreatePaymentResponse response = invoiceService.createPaymentForInvoice(invoiceId, request);
+            return  ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (RuntimeException e) {
+            CreatePaymentResponse error = new CreatePaymentResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e){
+            CreatePaymentResponse error = new CreatePaymentResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
 
 
     //Xử lý Discount: Theem Discount vaof Invoice
     @PostMapping("/add-discount/{invoiceId}")
-    public ResponseEntity<InvoiceDiscountResponse> addDiscountToInvoice(@PathVariable Long invoiceId, @RequestBody AddDiscountToInvoiceRequest request){
+    public ResponseEntity<InvoiceDiscountResponse> addDiscountToInvoice(
+            @PathVariable Long invoiceId, @RequestBody AddDiscountToInvoiceRequest request){
         try{
             InvoiceDiscountResponse response = invoiceService.addDiscountToInvoice(invoiceId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -262,8 +389,49 @@ public class InvoiceAdminController {
         }
     }
 
-    // Thống kê
+    // Thanh toan
+    @PostMapping("/confirm-success/{invoiceId}")
+    public ResponseEntity<InvoiceResponse> confirmPaymentSuccess(
+            @PathVariable Long invoiceId,
+            @RequestBody ConfirmPaymentSuccessRequest request
 
+    ){
+        try{
+            InvoiceResponse response = invoiceService.confirmPaymentSuccess(invoiceId, request);
+            return  ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (RuntimeException e) {
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e){
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+    }
+    @PostMapping("/confirm-failed/{invoiceId}")
+    public ResponseEntity<InvoiceResponse> confirmPaymentFailed(
+            @PathVariable Long invoiceId,
+            @RequestBody ConfirmPaymentFailedRequest request
+
+    ){
+        try{
+            InvoiceResponse response = invoiceService.confirmPaymentFailed(invoiceId, request);
+            return  ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (RuntimeException e) {
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e){
+            InvoiceResponse error = new InvoiceResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+    }
 
 }
 

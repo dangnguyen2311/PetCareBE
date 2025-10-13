@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers("/favicon.ico").permitAll()
 
                         // Admin only endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "DOCTOR", "STAFF")
 
                         // Example for multiple roles
                         .requestMatchers("/api/pets/**").hasAnyRole("USER", "DOCTOR", "ADMIN")

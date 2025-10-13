@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận lịch hẹn khám</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 0;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h2 {
+            margin: 0;
+        }
+        .info {
+            margin-top: 20px;
+            line-height: 1.8;
+            color: #333;
+        }
+        .info span {
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Xác nhận lịch hẹn khám thú cưng</h2>
+    </div>
+
+    <div class="info">
+        <p>Xin chào <span th:text="${customerName}">[Tên khách hàng]</span>,</p>
+        <p>Cảm ơn bạn đã đặt lịch khám cho thú cưng tại phòng khám của chúng tôi.
+            Dưới đây là thông tin chi tiết lịch hẹn:</p>
+
+        <p><span>Tên khách hàng:</span> <span th:text="${customerName}">Nguyễn Văn A</span></p>
+        <p><span>Email:</span> <span th:text="${customerEmail}">abc@example.com</span></p>
+        <p><span>Số điện thoại:</span> <span th:text="${customerPhone}">0123456789</span></p>
+        <p><span>Lý do khám:</span> <span th:text="${reason}">Khám định kỳ</span></p>
+        <p><span>Ngày khám:</span> <span th:text="${appointmentDate}">20/10/2025</span></p>
+        <p><span>Giờ khám:</span> <span th:text="${appointmentTime}">09:30 sáng</span></p>
+        <p><span>Bác sĩ phụ trách:</span> <span th:text="${doctorName}">BS. Lê Thị Hoa</span></p>
+        <p><span>Phòng khám:</span> <span th:text="${room}">Phòng số 3</span></p>
+        <p><span>Số thứ tự chờ:</span> <span th:text="${queueNumber}">A12</span></p>
+
+        <p>Vui lòng đến trước giờ hẹn khoảng 10 phút để được phục vụ tốt nhất.
+            Nếu có bất kỳ thay đổi hoặc thắc mắc nào, bạn có thể phản hồi lại email này.</p>
+    </div>
+
+    <div class="footer">
+        <p>Trân trọng,<br>Phòng khám thú cưng PetCare</p>
+        <p><a href="#">petcare.vn</a></p>
+    </div>
+</div>
+</body>
+</html>

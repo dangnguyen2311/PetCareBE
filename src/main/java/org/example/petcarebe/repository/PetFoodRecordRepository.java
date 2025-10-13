@@ -14,4 +14,5 @@ public interface PetFoodRecordRepository extends JpaRepository<PetFoodRecord,Lon
     List<PetFoodRecord> findAllByMedicalRecord(MedicalRecord medicalRecord, Sort sort);
 
     List<PetFoodRecord> findAllByMedicalRecordAndRecordDate(MedicalRecord medicalRecord, LocalDate recordDate, Sort sort);
+
 }

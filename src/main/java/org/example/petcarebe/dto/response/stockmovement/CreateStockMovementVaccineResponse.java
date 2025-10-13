@@ -1,6 +1,9 @@
 package org.example.petcarebe.dto.response.stockmovement;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.petcarebe.enums.StockMovementType;
 
 import java.time.LocalDate;

@@ -12,6 +12,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final UserHandshakeInterceptor interceptor;
+    private final CustomHandshakeHandler handshakeHandler;
+
+    public WebSocketConfig(UserHandshakeInterceptor interceptor, CustomHandshakeHandler handshakeHandler) {
+        this.interceptor = interceptor;
+        this.handshakeHandler = handshakeHandler;
+    }
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // Enable a simple memory-based message broker
@@ -29,11 +37,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 // sau bỏ 2 dưới dòng này
 //                .addInterceptors(new UserHandshakeInterceptor())
 //                .setHandshakeHandler(new CustomHandshakeHandler())
+                .addInterceptors(interceptor)
+                .setHandshakeHandler(handshakeHandler)
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
         
         // Register endpoint without SockJS for native WebSocket clients
+//        registry.addEndpoint("/ws-native")
+//                .setAllowedOriginPatterns("*");
+        // ✅ Cho Android (native)
         registry.addEndpoint("/ws-native")
+                .addInterceptors(interceptor)
+                .setHandshakeHandler(handshakeHandler)
+                .setAllowedOriginPatterns("*");
+        registry.addEndpoint("/ws-native/websocket")
+                .addInterceptors(interceptor)
+                .setHandshakeHandler(handshakeHandler)
                 .setAllowedOriginPatterns("*");
     }
 

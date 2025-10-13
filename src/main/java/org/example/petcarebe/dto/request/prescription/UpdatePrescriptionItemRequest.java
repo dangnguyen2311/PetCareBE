@@ -18,6 +18,8 @@ public class UpdatePrescriptionItemRequest {
     
     @NotNull(message = "Medicine ID is required")
     private Long medicineId;
+
+    private Integer quantity;
     
     @NotBlank(message = "Dosage is required")
     private String dosage;
@@ -28,15 +30,7 @@ public class UpdatePrescriptionItemRequest {
     @NotBlank(message = "Instruction is required")
     private String instruction;
     
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be positive")
-    private Double price;
-    
     @NotNull(message = "Tax percent is required")
     @PositiveOrZero(message = "Tax percent must be zero or positive")
     private Double taxPercent;
-    
-    @NotNull(message = "Promotion amount is required")
-    @PositiveOrZero(message = "Promotion amount must be zero or positive")
-    private Double promotionAmount;
 }

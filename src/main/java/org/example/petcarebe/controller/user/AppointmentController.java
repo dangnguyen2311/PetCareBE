@@ -8,6 +8,7 @@ import org.example.petcarebe.dto.response.appointment.AppointmentResponse;
 import org.example.petcarebe.dto.response.appointment.CreateAppointmentResponse;
 import org.example.petcarebe.dto.response.visit.CreateVisitResponse;
 import org.example.petcarebe.service.AppointmentService;
+import org.example.petcarebe.service.EmailService;
 import org.example.petcarebe.service.VisitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -247,6 +248,38 @@ public class AppointmentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsByDoctor(@PathVariable Long doctorId) {
+        try{
+            List<AppointmentResponse> responses = appointmentService.getAppointmentByDoctor(doctorId);
+            return ResponseEntity.ok(responses);
+        }
+        catch (RuntimeException e) {
+            List <AppointmentResponse> error = new ArrayList<>();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch(Exception e){
+            List <AppointmentResponse> error = new ArrayList<>();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    @DeleteMapping("/{appointmentId}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long appointmentId) {
+        try{
+            appointmentService.deleteAppointment(appointmentId);
+            return ResponseEntity.ok().build();
+        }
+        catch (RuntimeException e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
 
 }
 

@@ -1,6 +1,7 @@
 package org.example.petcarebe.repository;
 
 import org.example.petcarebe.enums.PaymentStatus;
+import org.example.petcarebe.model.Invoice;
 import org.example.petcarebe.model.Payment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,5 +83,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT p.paymentDate, COUNT(p) FROM Payment p WHERE p.paymentDate BETWEEN :fromDate AND :toDate GROUP BY p.paymentDate ORDER BY p.paymentDate")
     List<Object[]> getDailyTransactionCount(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    Optional<Payment> findByInvoice(Invoice invoice);
+
+    List<Payment> findAllByInvoice(Invoice invoice);
 }
 

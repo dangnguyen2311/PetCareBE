@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class CreatePrescriptionRequest {
 
     // Optional - can be null when creating prescription before invoice
+    private Long doctorId;
     private Long invoiceId;
     private String notes;
 }

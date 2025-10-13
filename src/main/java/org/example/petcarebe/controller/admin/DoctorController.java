@@ -123,7 +123,7 @@ public class DoctorController {
 
     /**
      * Get current doctor's profile (for authenticated doctor)
-     * Only DOCTOR role can access this
+     * Only DOCTOR role can access this, no bodyJSON
      */
     @GetMapping("/me")
     @PreAuthorize("hasRole('DOCTOR')")
@@ -145,6 +145,7 @@ public class DoctorController {
      */
     @PutMapping("/me")
     @PreAuthorize("hasRole('DOCTOR')")
+//    @PreAuthorize("hasAuthority('DOCTOR')")
     public ResponseEntity<DoctorResponse> updateMyProfile(@Valid @RequestBody UpdateDoctorRequest request,
                                                          Authentication authentication) {
         try {

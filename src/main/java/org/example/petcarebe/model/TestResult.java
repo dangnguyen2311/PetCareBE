@@ -13,13 +13,13 @@ public class TestResult {
     private Long id;
 
     @Column(name = "test_type", nullable = false)
-    private String testType;
+    private String testType;     //BLOOD_TEST, URINE_TEST, FECAL_TEST, PARASITOLOGY, POINT_OF_CARE, IMAGING
 
     @Column(name = "result", nullable = false)
     private String result;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private String status;  // NORMAL, ABNORMAL
 
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;

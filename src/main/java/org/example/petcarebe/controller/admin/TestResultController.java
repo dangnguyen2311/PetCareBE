@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -80,9 +81,36 @@ public class TestResultController {
             if (e.getMessage().contains("not found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+        catch (Exception e) {
+            TestResultResponse errorResponse = new TestResultResponse();
+            errorResponse.setMessage("An unexpected error occurred");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
+    /**
+     * Get Test Result by Doctor
+     * Only ADMIN and DOCTOR can request test results
+     */
+    @GetMapping("/doctor/{doctorId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
+    public ResponseEntity<List<TestResultResponse>> getTestResultStatisticsByDoctorId(@PathVariable Long doctorId) {
+        try{
+            List<TestResultResponse> responses = testResultService.getTestResultsByDoctorId(doctorId);
+            return ResponseEntity.ok(responses);
+        } catch (RuntimeException e) {
+            List<TestResultResponse> responses = new ArrayList<>();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responses);
+        }
+        catch (Exception e) {
+            List<TestResultResponse> responses = new ArrayList<>();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responses);
+        }
+
+    }
+
 
     /**
      * Update test result
@@ -107,6 +135,8 @@ public class TestResultController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
+
 
     /**
      * Delete test result
@@ -170,11 +200,11 @@ public class TestResultController {
     /**
      * Get test results by doctor ID
      */
-    @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<TestResultResponse>> getTestResultsByDoctorId(@PathVariable Long doctorId) {
-        List<TestResultResponse> testResults = testResultService.getTestResultsByDoctorId(doctorId);
-        return ResponseEntity.ok(testResults);
-    }
+//    @GetMapping("/doctor/{doctorId}")
+//    public ResponseEntity<List<TestResultResponse>> getTestResultsByDoctorId(@PathVariable Long doctorId) {
+//        List<TestResultResponse> testResults = testResultService.getTestResultsByDoctorId(doctorId);
+//        return ResponseEntity.ok(testResults);
+//    }
 
     /**
      * Get test results by date range

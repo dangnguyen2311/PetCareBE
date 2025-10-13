@@ -76,16 +76,33 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
     }
 
-    @GetMapping("/client/{clientId}")
-    public ResponseEntity<CustomerRespone> getCustomerByClientId(@PathVariable String clientId) {
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerRespone> updateCustomer(@PathVariable Long customerId, @Valid @RequestBody UpdateCustomerRequest request) {
         try{
-            CustomerRespone customer = customerService.getCustomerByClientId(clientId);
+            CustomerRespone customer = customerService.updateCustomer(customerId, request);
             return ResponseEntity.ok(customer);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
             CustomerRespone error =  new CustomerRespone();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<CustomerRespone> getCustomerByClientId(@PathVariable String clientId) {
+        try{
+            CustomerRespone customer = customerService.getCustomerByClientId(clientId);
+            return ResponseEntity.ok(customer);
+        } catch (RuntimeException e) {
+            CustomerRespone error =  new CustomerRespone();
+            error.setMessage(e.getMessage());
+            System.out.println();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        } catch (Exception e) {
+            CustomerRespone error =  new CustomerRespone();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 

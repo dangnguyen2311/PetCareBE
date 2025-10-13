@@ -18,19 +18,22 @@ public class NotificationResponse {
     private String type;
     private LocalDate createdDate;
     private String status;
-    private String title;
+
     private Long userId;
     private Boolean isRead;
     private String responseMessage;
     private LocalDateTime createdAt;
 
+    //Bo sung
+    private String timeStamp;
+    private String title;
     
-//    // Customer information
-//    private Long customerId;
-//    private String customerName;
-//    private String customerEmail;
-//
-//    // Vaccine schedule information (if applicable)
-//    private Long vaccineScheduleId;
-//    private String vaccineScheduleDetails;
+    // Customer information
+    private Long customerId;
+    private String customerName;
+    private String customerEmail;
+
+    // Vaccine schedule information (if applicable)
+    private Long vaccineScheduleId;
+    private String vaccineScheduleDetails;
 }

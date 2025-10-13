@@ -13,11 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class CreateStockMovementVaccineRequest {
-    private StockMovementType movementType;
     private Integer quantity;
     private Double price;
     private LocalDateTime movementDate;
     private String notes;
-    private Long inventoryItemId;
-    private Long vaccineInInvoiceId;
+    private Long vaccineId;
 }

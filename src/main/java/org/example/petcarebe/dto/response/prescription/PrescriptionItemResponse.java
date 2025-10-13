@@ -27,4 +27,5 @@ public class PrescriptionItemResponse {
     
     // Prescription information
     private Long prescriptionId;
+    private String message;
 }

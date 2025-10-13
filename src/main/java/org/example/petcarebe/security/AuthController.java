@@ -49,6 +49,7 @@ public class AuthController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         final String jwt = jwtUtil.generateToken(userDetails);
+        System.out.println("userDetail: " + userDetails + "\n, has role: " + userDetails.getAuthorities());
 
         return ResponseEntity.ok(new AuthResponse(jwt));
     }

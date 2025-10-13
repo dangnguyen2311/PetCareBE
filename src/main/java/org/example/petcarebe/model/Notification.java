@@ -18,6 +18,9 @@ public class Notification {
     @Column(name = "type", nullable = false)
     private String type;
 
+    @Column(name = "title")
+    private String title;
+
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 
@@ -29,6 +32,6 @@ public class Notification {
     private VaccineSchedule vaccineSchedule;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Customerid", nullable = false)
+    @JoinColumn(name = "Customerid")
     private Customer customer;
 }

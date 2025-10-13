@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+//import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -32,7 +32,7 @@ public class PrescriptionControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     private PrescriptionService prescriptionService;
 
     @Autowired
@@ -75,9 +75,7 @@ public class PrescriptionControllerTest {
                 .dosage("2 tablets")
                 .duration("7 days")
                 .instruction("Take after meals")
-                .price(100.0)
                 .taxPercent(10.0)
-                .promotionAmount(5.0)
                 .build();
 
         updateItemRequest = UpdatePrescriptionItemRequest.builder()
@@ -85,9 +83,7 @@ public class PrescriptionControllerTest {
                 .dosage("3 tablets")
                 .duration("10 days")
                 .instruction("Take before meals")
-                .price(150.0)
                 .taxPercent(10.0)
-                .promotionAmount(10.0)
                 .build();
     }
 

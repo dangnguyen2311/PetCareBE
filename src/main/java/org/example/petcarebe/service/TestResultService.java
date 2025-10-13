@@ -41,6 +41,8 @@ public class TestResultService {
         testResult.setResult(request.getResult());
         testResult.setNotes(request.getNotes());
         testResult.setCreatedDate(LocalDate.now());
+        testResult.setStatus(request.getStatus());
+        System.out.println("TestResult created, status " +  testResult.getStatus());
 
         TestResult savedTestResult = testResultRepository.save(testResult);
         return convertToResponse(savedTestResult, "Test result created successfully");
@@ -291,6 +293,7 @@ public class TestResultService {
                 .id(testResult.getId())
                 .testType(testResult.getTestType())
                 .result(testResult.getResult())
+                .status(testResult.getStatus())
                 .createdDate(testResult.getCreatedDate())
                 .notes(testResult.getNotes())
                 .message(message);

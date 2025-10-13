@@ -26,7 +26,7 @@ public class Medicine {
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "inventory_object_id")
     private InventoryObject inventoryObject;
 }

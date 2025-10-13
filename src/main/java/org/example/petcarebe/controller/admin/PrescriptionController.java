@@ -6,21 +6,25 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.example.petcarebe.dto.request.prescription.CreatePrescriptionItemRequest;
-import org.example.petcarebe.dto.request.prescription.CreatePrescriptionRequest;
-import org.example.petcarebe.dto.request.prescription.UpdatePrescriptionInvoiceRequest;
-import org.example.petcarebe.dto.request.prescription.UpdatePrescriptionItemRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.example.petcarebe.dto.request.prescription.*;
+import org.example.petcarebe.dto.response.doctor.DoctorResponse;
 import org.example.petcarebe.dto.response.prescription.PrescriptionItemResponse;
 import org.example.petcarebe.dto.response.prescription.PrescriptionResponse;
 import org.example.petcarebe.service.PrescriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.rmi.server.LogStream.log;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/admin/v1/prescription")
 @Tag(name = "💊 Prescription Management", description = "Admin endpoints for managing prescriptions and prescription items")
@@ -38,7 +42,8 @@ public class PrescriptionController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<PrescriptionResponse> createPrescription(@Valid @RequestBody CreatePrescriptionRequest request) {
+    public ResponseEntity<PrescriptionResponse> createPrescription(
+            @Valid @RequestBody CreatePrescriptionWithoutInvoiceRequest request) {
         try{
             PrescriptionResponse response = prescriptionService.createPrescription(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -63,21 +68,32 @@ public class PrescriptionController {
         }
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<PrescriptionResponse>> getAllPrescription(){
-//        try{
-//            List<PrescriptionResponse> response = prescriptionService.getAllPrescriptions();
-//            return ResponseEntity.status(HttpStatus.OK).body(response);
-//        }
-//        catch(RuntimeException e){
-//            List<PrescriptionResponse> errorResponse = new ArrayList<>();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-//        }
-//        catch(Exception e){
-//            List<PrescriptionResponse> errorResponse = new ArrayList<>();
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
-//    }
+    @PostMapping("/create-with-invoice")
+    public ResponseEntity<PrescriptionResponse> createPrescriptionWithInvoice(
+            @Valid @RequestBody CreatePrescriptionRequest request) {
+        try{
+            PrescriptionResponse response = prescriptionService.createPrescriptionWithInvoice(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        catch(RuntimeException e){
+            // Log the actual error for debugging
+            System.err.println("Error creating prescription: " + e.getMessage());
+            e.printStackTrace();
+
+            PrescriptionResponse errorResponse = new PrescriptionResponse();
+            errorResponse.setNote("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        catch(Exception e){
+            // Log unexpected errors
+            System.err.println("Unexpected error creating prescription: " + e.getMessage());
+            e.printStackTrace();
+
+            PrescriptionResponse errorResponse = new PrescriptionResponse();
+            errorResponse.setNote("Unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 
 
     @Operation(
@@ -103,6 +119,7 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
+
 
     @Operation(
             summary = "Update prescription with invoice",
@@ -148,13 +165,16 @@ public class PrescriptionController {
             @PathVariable Long prescriptionId,
             @Valid @RequestBody CreatePrescriptionItemRequest request) {
         try {
+            System.out.println("Add prescription item");
             PrescriptionItemResponse response = prescriptionService.addPrescriptionItem(prescriptionId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             PrescriptionItemResponse errorResponse = new PrescriptionItemResponse();
+            errorResponse.setMessage("Error of PrescriptionItemResponse: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         } catch (Exception e) {
             PrescriptionItemResponse errorResponse = new PrescriptionItemResponse();
+            errorResponse.setMessage("Error of PrescriptionItemResponse: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
@@ -283,6 +303,26 @@ public class PrescriptionController {
             List<PrescriptionResponse> error = new ArrayList<>();
             System.err.println("Error getting all prescriptions: " + e.getMessage());
             return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<List<PrescriptionResponse>> getAllPrescriptionsByDoctor(
+            @PathVariable Long doctorId,
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        try{
+            List<PrescriptionResponse> responses = prescriptionService.getAllPrescriptionsByDoctor(doctorId, date);
+            return ResponseEntity.ok(responses);
+        } catch (RuntimeException e) {
+            List<PrescriptionResponse> error = new ArrayList<>();
+            System.out.println(e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        } catch (Exception e) {
+            List<PrescriptionResponse> error = new ArrayList<>();
+            System.out.println(e.getMessage());
+            return  ResponseEntity.badRequest().body(error);
         }
     }
 

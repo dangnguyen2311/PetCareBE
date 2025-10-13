@@ -13,11 +13,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class CreateStockMovementProductRequest {
-    private StockMovementType movementType;
+    private Long productId;
     private Integer quantity;
     private Double price;
     private LocalDateTime movementDate;
     private String notes;
-    private Long inventoryItemId;
-    private Long productInInvoiceId;
+
 }

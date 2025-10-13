@@ -1,9 +1,6 @@
 package org.example.petcarebe.dto.response.stockmovement;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.petcarebe.enums.StockMovementType;
 
 import java.time.LocalDate;
@@ -25,12 +22,12 @@ public class CreateStockMovementProductResponse {
     private Long inventoryItemId;
     private String inventoryItemName;
     private String inventoryItemUnit;
-    private Long productInInvoiceId;
-    private String productInInvoiceName;
-    private String productInInvoiceUnit;
-    private String productInInvoiceCategory;
-    private String productInInvoiceBrand;
-    private String productInInvoiceSupplier;
+    private Long productId;
+    private String productName;
+    private String productUnit;
+    private String productCategory;
+    private String productBrand;
+    private String productSupplier;
     private String message;
 
 }

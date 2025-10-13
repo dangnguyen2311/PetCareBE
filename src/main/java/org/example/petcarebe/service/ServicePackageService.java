@@ -2,13 +2,17 @@ package org.example.petcarebe.service;
 
 import org.example.petcarebe.dto.request.servicepackage.CreateServicePackageRequest;
 import org.example.petcarebe.dto.request.servicepackage.UpdateServicePackageRequest;
+import org.example.petcarebe.dto.response.servicepackage.ServicePackageItemResponse;
 import org.example.petcarebe.dto.response.servicepackage.ServicePackageResponse;
 import org.example.petcarebe.model.ServicePackage;
+import org.example.petcarebe.model.ServicePackageItem;
+import org.example.petcarebe.repository.ServicePackageItemRepository;
 import org.example.petcarebe.repository.ServicePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +21,8 @@ public class ServicePackageService {
 
     @Autowired
     private ServicePackageRepository servicePackageRepository;
+    @Autowired
+    private ServicePackageItemRepository servicePackageItemRepository;
 
     public ServicePackageResponse createServicePackage(CreateServicePackageRequest request) {
         ServicePackage servicePackage = new ServicePackage();
@@ -42,6 +48,15 @@ public class ServicePackageService {
         ServicePackage servicePackage = servicePackageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ServicePackage not found with id: " + id));
         return convertToResponse(servicePackage);
+    }
+
+    public List<ServicePackageItemResponse> getServicePackageItems(Long servicePackageId) {
+        ServicePackage servicePackage = servicePackageRepository.findById(servicePackageId)
+                .orElseThrow(() -> new RuntimeException("ServicePackage not found with id: " + servicePackageId));
+
+        List<ServicePackageItem> servicePackageItems = new ArrayList<>();
+        servicePackageItems = servicePackageItemRepository.findAllByServicePackage(servicePackage);
+        return  servicePackageItems.stream().map(this::convertToServicePackageItemResponse).collect(Collectors.toList());
     }
 
     public ServicePackageResponse updateServicePackage(Long id, UpdateServicePackageRequest request) {
@@ -78,5 +93,16 @@ public class ServicePackageService {
                 servicePackage.getUpdatedAt()
         );
     }
+
+    private ServicePackageItemResponse convertToServicePackageItemResponse(ServicePackageItem servicePackageItem) {
+        return ServicePackageItemResponse.builder()
+                .serviceId(servicePackageItem.getService() != null ? servicePackageItem.getService().getId() : null)
+                .serviceName(servicePackageItem.getService() != null ? servicePackageItem.getService().getName() : null)
+                .serviceCategory(servicePackageItem.getService() != null ? servicePackageItem.getService().getCategory() : null)
+                .serviceDescription(servicePackageItem.getService() != null ? servicePackageItem.getService().getDescription() : null)
+                .build();
+    }
+
+
 }
 

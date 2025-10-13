@@ -10,9 +10,11 @@ import org.example.petcarebe.dto.response.visit.VisitStatisticsResponse;
 import org.example.petcarebe.dto.response.diagnosis.DiagnosisResponse;
 import org.example.petcarebe.dto.response.testresult.TestResultResponse;
 import org.example.petcarebe.enums.AppointmentStatus;
+import org.example.petcarebe.enums.InvoiceStatus;
 import org.example.petcarebe.model.*;
 import org.example.petcarebe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,12 +46,14 @@ public class VisitService {
     private TestResultService testResultService;
 
     public CreateVisitResponse createVisit(CreateVisitRequest request) {
-        WorkSchedule workSchedule = workScheduleRepository.findById(request.getWorkScheduleId()).orElseThrow(() -> new RuntimeException("Work Schedule Not Found"));
-        ClinicRoom clinicRoom =  clinicRoomRepository.findById(request.getClinicRoomId()).orElseThrow(() -> new RuntimeException("ClinicRoom Not Found"));
+        WorkSchedule workSchedule = workScheduleRepository.findById(request.getWorkScheduleId())
+                .orElseThrow(() -> new RuntimeException("Work Schedule Not Found"));
+        ClinicRoom clinicRoom =  clinicRoomRepository.findById(request.getClinicRoomId())
+                .orElseThrow(() -> new RuntimeException("ClinicRoom Not Found"));
         // Truowngf hop ddi khams truwcj tieeps
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId()).orElse(null);
 
-        if(appointment != null && appointment.getStatus() != AppointmentStatus.INPROGRESS) {
+        if(appointment != null && !(appointment.getStatus() == AppointmentStatus.INPROGRESS || appointment.getStatus() == AppointmentStatus.CONFIRMED)) {
             throw new RuntimeException("Appointment status is not valid");
 
         }
@@ -216,6 +220,20 @@ public class VisitService {
         List<Visit> visits = visitRepository.findByVisitDate(date);
         return visits.stream()
                 .map(this::convertToVisitResponse)
+                .collect(Collectors.toList());
+    }
+    /**
+     * Get visits by param: fromDate, toDate
+     */
+    public List<VisitResponse> getVisitsByParams(LocalDate fromDate, LocalDate toDate) {
+        if (fromDate == null) {
+            fromDate = LocalDate.of(1970, 1, 1); // hoặc ngày nhỏ nhất
+        }
+        if (toDate == null) {
+            toDate = LocalDate.now(); // lấy ngày hiện tại
+        }
+        return visitRepository.findAllByVisitDateBetween(fromDate, toDate, Sort.by(Sort.Direction.ASC, "id"))
+                .stream().map(this::convertToVisitResponse)
                 .collect(Collectors.toList());
     }
 
@@ -459,5 +477,7 @@ public class VisitService {
                 .message("Doctor performance statistics retrieved successfully")
                 .build();
     }
+
+
 }
 

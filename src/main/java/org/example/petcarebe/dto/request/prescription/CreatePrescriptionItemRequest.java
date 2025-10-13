@@ -24,22 +24,13 @@ public class CreatePrescriptionItemRequest {
     
     @NotBlank(message = "Duration is required")
     private String duration;
-
-    @NotBlank(message = "Quantity is required")
     private Integer quantity;
     
     @NotBlank(message = "Instruction is required")
     private String instruction;
     
-    @NotNull(message = "Price is required")
-    @Positive(message = "Price must be positive")
-    private Double price;
-    
     @NotNull(message = "Tax percent is required")
     @PositiveOrZero(message = "Tax percent must be zero or positive")
     private Double taxPercent;
-    
-    @NotNull(message = "Promotion amount is required")
-    @PositiveOrZero(message = "Promotion amount must be zero or positive")
-    private Double promotionAmount;
+
 }

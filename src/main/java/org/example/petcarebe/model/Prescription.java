@@ -18,7 +18,11 @@ public class Prescription {
     @Column(name = "notes")
     private String notes;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "Invoiceid")
     private Invoice invoice;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "doctorid")
+    private Doctor doctor;
 }

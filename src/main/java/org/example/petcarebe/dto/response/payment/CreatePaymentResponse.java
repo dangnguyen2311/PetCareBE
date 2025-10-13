@@ -4,16 +4,30 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.petcarebe.enums.PaymentStatus;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class CreatePaymentResponse {
-    private Long paymentId;
+    private Long id;
+    private LocalDate paymentDate;
+    private Double amount;
+    private String method;
+    private PaymentStatus status; //PENDING, PROCESSING, SUCCESS, FAILED, CANCELLED, REFUNDED, PARTIAL_REFUND, EXPIRED, DECLINED
+    private String statusDisplayName;
     private String transactionCode;
-    private String paymentUrl; // For online payments like VNPay
-    private String qrCode; // For QR code payments
+
+    // Invoice information
+    private Long invoiceId;
+
+    // Additional fields
+    private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String message;
-    private Boolean success;
 }

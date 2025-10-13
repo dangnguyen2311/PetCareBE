@@ -1,15 +1,13 @@
 package org.example.petcarebe.controller.user;
 
 import org.example.petcarebe.dto.request.pet.*;
-import org.example.petcarebe.dto.response.pet.PetFoodRecordResponse;
-import org.example.petcarebe.dto.response.pet.PetImageRecordResponse;
-import org.example.petcarebe.dto.response.pet.PetResponse;
-import org.example.petcarebe.dto.response.pet.PetWeightRecordResponse;
+import org.example.petcarebe.dto.response.pet.*;
 import org.example.petcarebe.service.PetService;
 import org.example.petcarebe.dto.response.activity.DailyActivityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +33,26 @@ public class PetController {
             System.err.println("Error creating prescription: " + e.getMessage());
             e.printStackTrace();
             PetResponse error = new  PetResponse();
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/create-with-customer")
+    public ResponseEntity<CreatePetAndCustomerResponse> createPetAndCreateCustomer(@RequestBody CreatePetAndCustomerRequest request){
+        try {
+            CreatePetAndCustomerResponse createdPet = petService.createPetAndCustomer(request);
+            return ResponseEntity.ok(createdPet);
+        }
+        catch (RuntimeException e) {
+            System.err.println("Error creating prescription: " + e.getMessage());
+            e.printStackTrace();
+            CreatePetAndCustomerResponse error = new  CreatePetAndCustomerResponse();
+            return ResponseEntity.internalServerError().body(error);
+        }
+        catch (Exception e) {
+            System.err.println("Error creating prescription: " + e.getMessage());
+            e.printStackTrace();
+            CreatePetAndCustomerResponse error = new  CreatePetAndCustomerResponse();
             return ResponseEntity.badRequest().body(error);
         }
     }
@@ -85,7 +103,7 @@ public class PetController {
         }
     }
 
-    @GetMapping("/getlist")
+    @GetMapping("/get-list")
     public ResponseEntity<List<PetResponse>> getAllPets() {
         try {
             List<PetResponse> pets = petService.getAllPets();
@@ -149,6 +167,26 @@ public class PetController {
         }
     }
 
+    @GetMapping("/{petId}/get-record")
+    public ResponseEntity<PetRecordDailyResponse> getPetRecord(
+            @PathVariable Long petId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        try{
+            PetRecordDailyResponse response = petService.getPetRecordDaily(petId, date);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            PetRecordDailyResponse error = new PetRecordDailyResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+        catch (Exception e) {
+            PetRecordDailyResponse error = new PetRecordDailyResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
     @PostMapping("/{petId}/add-weight")
     public ResponseEntity<PetWeightRecordResponse> addPetWeightRecordByPetId(
             @PathVariable Long petId,
@@ -186,20 +224,20 @@ public class PetController {
         }
     }
 
-    @PostMapping("/{petId}/add-image")
+    @PostMapping(value = "/{petId}/add-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PetImageRecordResponse> addPetImageRecordByPetId(
             @PathVariable Long petId,
-            @RequestBody CreatePetImageRecordRequest request) {
-        try{
+            @ModelAttribute CreatePetImageRecordRequest request) {
+        try {
             PetImageRecordResponse response = petService.createPetImageRecord(petId, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            PetImageRecordResponse error = new  PetImageRecordResponse();
-            error.setMessage("Error creating : " + e.getMessage());
+            PetImageRecordResponse error = new PetImageRecordResponse();
+            error.setMessage("Error creating: " + e.getMessage());
             return ResponseEntity.internalServerError().body(error);
         } catch (Exception e) {
-            PetImageRecordResponse error = new  PetImageRecordResponse();
-            error.setMessage("Error creating : " + e.getMessage());
+            PetImageRecordResponse error = new PetImageRecordResponse();
+            error.setMessage("Error creating: " + e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
     }

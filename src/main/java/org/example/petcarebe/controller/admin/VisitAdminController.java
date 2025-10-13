@@ -17,6 +17,7 @@ import org.example.petcarebe.dto.response.visit.VisitMedicalSummaryResponse;
 import org.example.petcarebe.dto.response.visit.VisitStatisticsResponse;
 import org.example.petcarebe.dto.response.diagnosis.DiagnosisResponse;
 import org.example.petcarebe.dto.response.testresult.TestResultResponse;
+import org.example.petcarebe.enums.InvoiceStatus;
 import org.example.petcarebe.service.VisitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,7 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/v1/visits")
 @Tag(name = "🏥 Visit Management (Admin)", description = "Admin endpoints for managing visits and medical records")
-public class VisitController {
+public class VisitAdminController {
 
     @Autowired
     private VisitService visitService;
@@ -53,9 +54,29 @@ public class VisitController {
                     content = @Content)
     })
     @PostMapping("/create-visit")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR', 'STAFF')")
     public ResponseEntity<CreateVisitResponse> createVisit(
             @Parameter(description = "Visit creation request", required = true)
+            @Valid @RequestBody CreateVisitRequest request) {
+        try{
+            CreateVisitResponse response = visitService.createVisit(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        catch (RuntimeException e) {
+            CreateVisitResponse error = new CreateVisitResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+        catch(Exception e){
+            CreateVisitResponse error = new CreateVisitResponse();
+            error.setMessage("An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @PostMapping("/create-from-appointment/{appointmentId}")
+    public ResponseEntity<CreateVisitResponse> createVisitFromAppointment(
+            @PathVariable Long appointmentId,
             @Valid @RequestBody CreateVisitRequest request) {
         try{
             CreateVisitResponse response = visitService.createVisit(request);
@@ -87,6 +108,23 @@ public class VisitController {
     public ResponseEntity<List<VisitResponse>> getAllVisits() {
         try {
             List<VisitResponse> visits = visitService.getAllVisits();
+            return ResponseEntity.ok(visits);
+        } catch (Exception e) {
+            System.err.println("Error getting all visits: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/get-list")
+    public ResponseEntity<List<VisitResponse>> getVisitsByParams(
+            @RequestParam(value = "fromDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(value = "toDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+
+    ) {
+        try {
+            List<VisitResponse> visits = visitService.getVisitsByParams(fromDate, toDate);
             return ResponseEntity.ok(visits);
         } catch (Exception e) {
             System.err.println("Error getting all visits: " + e.getMessage());
@@ -301,6 +339,11 @@ public class VisitController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    /**
+     * Get prescrition for a visit
+     * Accessible by all authenticated users
+     */
+
 
     /**
      * Get test results for a visit

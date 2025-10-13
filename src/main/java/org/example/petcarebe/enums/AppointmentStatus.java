@@ -10,7 +10,8 @@ public enum AppointmentStatus {
     COMPLETED("COMPLETED", "Appointment has been completed successfully"),
     CANCELLED("CANCELLED", "Appointment has been cancelled"),
     NOSHOW("NOSHOW", "Customer did not show up for the appointment"),
-    RESCHEDULED("RESCHEDULED", "Appointment has been rescheduled to another time");
+    RESCHEDULED("RESCHEDULED", "Appointment has been rescheduled to another time"),
+    DELETED("DELETED", "Appointment has been deleted"),;
 
     private final String displayName;
     private final String description;

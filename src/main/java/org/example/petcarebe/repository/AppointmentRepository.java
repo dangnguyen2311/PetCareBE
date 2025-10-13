@@ -24,6 +24,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     Integer getAppointmentsByAppointmentDate(LocalDate appointmentDate, Sort sort);
 
+    @Query("SELECT a FROM Appointment a WHERE a.workSchedule.doctor.id = :doctorId")
+    List<Appointment> findAllByDoctorId(@Param("doctorId") Long doctorId);
+
     /**
      * Find appointments by pet ID and appointment date
      */

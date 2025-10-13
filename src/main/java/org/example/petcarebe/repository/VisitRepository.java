@@ -1,5 +1,6 @@
 package org.example.petcarebe.repository;
 
+import org.example.petcarebe.dto.response.visit.VisitResponse;
 import org.example.petcarebe.model.Visit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -170,5 +171,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
      */
     @Query("SELECT v FROM Visit v WHERE v.pet.id = :petId AND v.visitDate = :visitDate")
     List<Visit> findByPetIdAndVisitDate(@Param("petId") Long petId, @Param("visitDate") LocalDate visitDate);
+
+    List<Visit> findAllByVisitDateBetween(LocalDate visitDateAfter, LocalDate visitDateBefore, Sort sort);
 }
 

@@ -1,6 +1,7 @@
 package org.example.petcarebe.repository;
 
 import jakarta.transaction.Transactional;
+import org.example.petcarebe.model.Medicine;
 import org.example.petcarebe.model.MedicinePriceHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,4 +23,6 @@ public interface MedicinePriceHistoryRepository extends JpaRepository<MedicinePr
     void deactiveAllActiveRecord(@Param("endDate") LocalDate endDate);
 
     Optional<MedicinePriceHistory> findByStatus(String status);
+
+    Optional<MedicinePriceHistory> findByStatusAndMedicine(String status, Medicine medicine);
 }

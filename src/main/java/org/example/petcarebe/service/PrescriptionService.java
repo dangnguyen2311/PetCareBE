@@ -1,7 +1,9 @@
 package org.example.petcarebe.service;
 
+import jakarta.validation.Valid;
 import org.example.petcarebe.dto.request.prescription.CreatePrescriptionItemRequest;
 import org.example.petcarebe.dto.request.prescription.CreatePrescriptionRequest;
+import org.example.petcarebe.dto.request.prescription.CreatePrescriptionWithoutInvoiceRequest;
 import org.example.petcarebe.dto.request.prescription.UpdatePrescriptionItemRequest;
 import org.example.petcarebe.dto.response.prescription.PrescriptionItemResponse;
 import org.example.petcarebe.dto.response.prescription.PrescriptionResponse;
@@ -9,6 +11,7 @@ import org.example.petcarebe.enums.StockMovementType;
 import org.example.petcarebe.model.*;
 import org.example.petcarebe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,9 @@ public class PrescriptionService {
     private MedicineRepository medicineRepository;
 
     @Autowired
+    private DoctorRepository doctorRepository;
+
+    @Autowired
     private InventoryObjectRepository  inventoryObjectRepository;
 
     @Autowired
@@ -42,25 +48,36 @@ public class PrescriptionService {
     private StockMovementRepository stockMovementRepository;
     @Autowired
     private StockMovement_PrescriptionItemRepository stockMovement_PrescriptionItemRepository;
+    @Autowired
+    private MedicineInPromotionRepository  medicineInPromotionRepository;
 
-    public PrescriptionResponse createPrescription(CreatePrescriptionRequest request) {
-        Invoice invoice = null;
-        Long invoiceId = null;
+    public PrescriptionResponse createPrescription(@Valid CreatePrescriptionWithoutInvoiceRequest request) {
+        Doctor doctorById = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor Not Found"));
+        Prescription prescription = new Prescription();
+        prescription.setCreatedDate(LocalDate.now());
+        prescription.setNotes(request.getNotes());
+        prescription.setDoctor(doctorById);
 
-        // Only validate and fetch invoice if invoiceId is provided
-        if (request.getInvoiceId() != null) {
-            invoice = invoiceRepository.findById(request.getInvoiceId())
-                    .orElseThrow(() -> new RuntimeException("Invoice not found with id: " + request.getInvoiceId()));
-            invoiceId = invoice.getId();
-        }
+        Prescription savedPrescription = prescriptionRepository.save(prescription);
+        return convertToResponse(savedPrescription);
+    }
+
+    public PrescriptionResponse createPrescriptionWithInvoice(CreatePrescriptionRequest  request) {
+
+        Doctor doctorById = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor Not Found"));
+        Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
+                .orElse(new Invoice());
 
         Prescription prescription = new Prescription();
         prescription.setInvoice(invoice); // Can be null
         prescription.setCreatedDate(LocalDate.now());
         prescription.setNotes(request.getNotes());
+        prescription.setDoctor(doctorById);
 
         Prescription savedPrescription = prescriptionRepository.save(prescription);
-        return convertToResponse(savedPrescription, invoiceId);
+        return convertToResponse(savedPrescription);
     }
     /**
      * Update prescription with invoice
@@ -78,7 +95,7 @@ public class PrescriptionService {
         prescription.setInvoice(invoice);
         Prescription updatedPrescription = prescriptionRepository.save(prescription);
 
-        return convertToResponse(updatedPrescription, invoiceId);
+        return convertToResponse(updatedPrescription);
     }
 
     /**
@@ -87,13 +104,7 @@ public class PrescriptionService {
     public PrescriptionResponse getPrescriptionById(Long id) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found with id: " + id));
-
-        Long invoiceId = null;
-        if (prescription.getInvoice() != null) {
-            invoiceId = prescription.getInvoice().getId();
-        }
-
-        return convertToResponse(prescription, invoiceId);
+        return convertToResponse(prescription);
     }
 
     // ==================== PRESCRIPTION ITEM METHODS ====================
@@ -101,26 +112,39 @@ public class PrescriptionService {
     /**
      * Add prescription item to prescription
      */
-    @Transactional
-    public PrescriptionItemResponse addPrescriptionItem(Long prescriptionId, CreatePrescriptionItemRequest request) {
+//    @Transactional
+    public PrescriptionItemResponse addPrescriptionItem(
+            Long prescriptionId,
+            CreatePrescriptionItemRequest request) {
+        System.out.println("Search Promotion for Medicine: " + 000.1);
         // Validate prescription exists
         Prescription prescription = prescriptionRepository.findById(prescriptionId)
                 .orElseThrow(() -> new RuntimeException("Prescription not found with id: " + prescriptionId));
 
         // Validate medicine exists
+        System.out.println("Search Promotion for Medicine: " + 000.2);
         Medicine medicine = medicineRepository.findById(request.getMedicineId())
                 .orElseThrow(() -> new RuntimeException("Medicine not found with id: " + request.getMedicineId()));
 
-        MedicinePriceHistory medicinePriceHistory = medicinePriceHistoryRepository.findByStatus("ACTIVE")
+        //Get price
+        System.out.println("Search Promotion for Medicine: " + 000.3);
+        MedicinePriceHistory medicinePriceHistory = medicinePriceHistoryRepository.findByStatusAndMedicine("ACTIVE", medicine)
                 .orElseThrow(() -> new RuntimeException("Medicine price history not found with id: " + request.getMedicineId()));
 
-        // Create prescription item
+        // Get Promotion for Medicine
+        Double totalPromotionAmount = 0.0;
+        System.out.println("Search Promotion for Medicine: " + 0.4);
+        List<MedicineInPromotion> medicineInPromotionList = medicineInPromotionRepository.findAllByMedicine(medicine);
+        totalPromotionAmount = getTotalPromotionAmount(medicineInPromotionList, medicinePriceHistory.getPrice());
 
+        // Create prescription item
+        System.out.println("Search InventoryItem: " + totalPromotionAmount);
         InventoryObject inventoryObjectByMedicine = medicine.getInventoryObject();
         InventoryItem inventoryItemByMedicine = inventoryItemRepository.findByInventoryObject(inventoryObjectByMedicine)
                 .orElseThrow(() -> new RuntimeException("Inventory item not found with id: " + inventoryObjectByMedicine.getId()));
         inventoryItemByMedicine.setQuantity(adjustQuantity(StockMovementType.SALE, request.getQuantity(), inventoryItemByMedicine.getQuantity()));
         InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItemByMedicine);
+
         // tạo stockmovement
         StockMovement stockMovement = new StockMovement();
         stockMovement.setQuantity(request.getQuantity());
@@ -129,7 +153,6 @@ public class PrescriptionService {
         stockMovement.setPrice(medicinePriceHistory.getPrice());
         stockMovement.setMovementDate(LocalDateTime.now());
         stockMovement.setInventoryItem(savedInventoryItem);
-
         StockMovement savedStockMovement = stockMovementRepository.save(stockMovement);
 
         PrescriptionItem prescriptionItem = new PrescriptionItem();
@@ -139,10 +162,9 @@ public class PrescriptionService {
         prescriptionItem.setDosage(request.getDosage());
         prescriptionItem.setDuration(request.getDuration());
         prescriptionItem.setInstruction(request.getInstruction());
-        prescriptionItem.setPrice(request.getPrice());
+        prescriptionItem.setPrice(medicinePriceHistory.getPrice());
         prescriptionItem.setTaxPercent(request.getTaxPercent());
-        prescriptionItem.setPromotionAmount(request.getPromotionAmount());
-
+        prescriptionItem.setPromotionAmount(totalPromotionAmount);
         PrescriptionItem savedItem = prescriptionItemRepository.save(prescriptionItem);
 
         StockMovement_PrescriptionItem stockMovementPrescriptionItem = new StockMovement_PrescriptionItem();
@@ -180,25 +202,72 @@ public class PrescriptionService {
      * Update prescription item
      */
     @Transactional
-    public PrescriptionItemResponse updatePrescriptionItem(Long itemId, UpdatePrescriptionItemRequest request) {
+    public PrescriptionItemResponse updatePrescriptionItem(Long prescriptionItemId, UpdatePrescriptionItemRequest request) {
         // Validate prescription item exists
-        PrescriptionItem item = prescriptionItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Prescription item not found with id: " + itemId));
+        PrescriptionItem prescriptionItem = prescriptionItemRepository.findById(prescriptionItemId)
+                .orElseThrow(() -> new RuntimeException("Prescription item not found with id: " + prescriptionItemId));
+        int beforeQuantity = prescriptionItem.getQuantity();
 
         // Validate medicine exists
         Medicine medicine = medicineRepository.findById(request.getMedicineId())
                 .orElseThrow(() -> new RuntimeException("Medicine not found with id: " + request.getMedicineId()));
 
-        // Update prescription item
-        item.setMedicine(medicine);
-        item.setDosage(request.getDosage());
-        item.setDuration(request.getDuration());
-        item.setInstruction(request.getInstruction());
-        item.setPrice(request.getPrice());
-        item.setTaxPercent(request.getTaxPercent());
-        item.setPromotionAmount(request.getPromotionAmount());
+        //Get price
+        MedicinePriceHistory medicinePriceHistory = medicinePriceHistoryRepository.findByStatusAndMedicine("ACTIVE", medicine)
+                .orElseThrow(() -> new RuntimeException("Medicine price history not found with id: " + request.getMedicineId()));
 
-        PrescriptionItem updatedItem = prescriptionItemRepository.save(item);
+        // Get Promotion for Medicine
+        Double totalPromotionAmount = 0.0;
+        List<MedicineInPromotion> medicineInPromotionList = medicineInPromotionRepository.findAllByMedicine(medicine);
+        totalPromotionAmount = getTotalPromotionAmount(medicineInPromotionList, medicinePriceHistory.getPrice());
+
+        // Get StockMovement_PrescriptionItem
+        StockMovement_PrescriptionItem  stockMovementPrescriptionItemToUpdate =
+                stockMovement_PrescriptionItemRepository.findTopByPrescriptionItemOrderByCreatedAtDesc(prescriptionItem)
+                        .orElseThrow(() -> new RuntimeException("StockMovement_PrescriptionItem not found"));
+        // Lỗi ở chỗ StockMovement_PrescriptionItem có thể có nhiều kqua, nếu chỉ sửa 1 lần thì okee
+        StockMovement stockMovementToUpdate = stockMovementPrescriptionItemToUpdate.getStockMovement();
+
+
+        // Update prescription item
+        InventoryObject inventoryObjectByMedicine = medicine.getInventoryObject();
+        InventoryItem inventoryItemByMedicine = inventoryItemRepository.findByInventoryObject(inventoryObjectByMedicine)
+                .orElseThrow(() -> new RuntimeException("Inventory item not found with id: " + inventoryObjectByMedicine.getId()));
+
+        inventoryItemByMedicine.setQuantity(adjustQuantity(StockMovementType.ADJUSTMENT,
+                request.getQuantity() - beforeQuantity,
+                inventoryItemByMedicine.getQuantity()));
+        InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItemByMedicine);
+
+        // tạo stockmovement, xử lý thêm bớt
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setQuantity(request.getQuantity() - beforeQuantity);
+        stockMovement.setMovementType(StockMovementType.ADJUSTMENT);
+        stockMovement.setCreatedAt(LocalDate.now());
+        stockMovement.setPrice(medicinePriceHistory.getPrice());
+        stockMovement.setMovementDate(LocalDateTime.now());
+        stockMovement.setInventoryItem(savedInventoryItem);
+        StockMovement savedStockMovement = stockMovementRepository.save(stockMovement);
+
+        // Update prescription item
+        prescriptionItem.setMedicine(medicine);
+        prescriptionItem.setDosage(request.getDosage());
+        prescriptionItem.setDuration(request.getDuration());
+        prescriptionItem.setInstruction(request.getInstruction());
+        prescriptionItem.setPrice(medicinePriceHistory.getPrice());
+        prescriptionItem.setTaxPercent(request.getTaxPercent());
+        prescriptionItem.setPromotionAmount(totalPromotionAmount);
+        prescriptionItem.setQuantity(request.getQuantity());
+
+        PrescriptionItem updatedItem = prescriptionItemRepository.save(prescriptionItem);
+
+        // Save new StockMovement for PrescriptionItem
+        StockMovement_PrescriptionItem stockMovementPrescriptionItem = new StockMovement_PrescriptionItem();
+        stockMovementPrescriptionItem.setPrescriptionItem(updatedItem);
+        stockMovementPrescriptionItem.setStockMovement(savedStockMovement);
+        stockMovementPrescriptionItem.setCreatedAt(LocalDateTime.now());
+        StockMovement_PrescriptionItem savedStockMovementPrescriptionItem = stockMovement_PrescriptionItemRepository.save(stockMovementPrescriptionItem);
+
         return convertToItemResponse(updatedItem);
     }
 
@@ -209,6 +278,14 @@ public class PrescriptionService {
     public void deletePrescriptionItem(Long itemId) {
         PrescriptionItem item = prescriptionItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Prescription item not found with id: " + itemId));
+        //Delete from Stock
+        List<StockMovement_PrescriptionItem> stockMovementPrescriptionItem = stockMovement_PrescriptionItemRepository.findAllByPrescriptionItem(item);
+        for (StockMovement_PrescriptionItem i : stockMovementPrescriptionItem) {
+            StockMovement stockMovement = i.getStockMovement();
+            stockMovement_PrescriptionItemRepository.delete(i);
+            stockMovementRepository.delete(stockMovement);
+        }
+
         prescriptionItemRepository.delete(item);
     }
 
@@ -220,19 +297,21 @@ public class PrescriptionService {
         return prescriptions.stream()
                 .map(prescription -> {
                     Long invoiceId = prescription.getInvoice() != null ? prescription.getInvoice().getId() : null;
-                    return convertToResponse(prescription, invoiceId);
+                    return convertToResponse(prescription);
                 })
                 .collect(Collectors.toList());
     }
     private Integer adjustQuantity(StockMovementType type, Integer requestQuantity, Integer inventoryItemQuantity) {
+        //requestQuantity = before - after
         return switch (type) {
             case IN, PURCHASE, RETURN, ADJUSTMENT ->
-                    inventoryItemQuantity + requestQuantity;
+                    inventoryItemQuantity - requestQuantity;
 
             case OUT, SALE, EXPIRED, LOST, PRESCRIPTION, TREATMENT -> {
                 if (inventoryItemQuantity - requestQuantity >= 0) {
                     yield inventoryItemQuantity - requestQuantity;
                 } else {
+                    System.out.println("Not enough inventory items for ");
                     throw new RuntimeException("Not enough stock for movement: " + type);
                 }
             }
@@ -258,9 +337,36 @@ public class PrescriptionService {
         prescriptionRepository.delete(prescription);
     }
 
+    public List<PrescriptionResponse> getAllPrescriptionsByDoctor(Long doctorId, LocalDate date) {
+        if(date == null) date = LocalDate.now();
+        Doctor doctorById = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + doctorId));
+
+        List<Prescription> prescriptionList = prescriptionRepository.
+                findAllByDoctorAndCreatedDate(doctorById, date, Sort.by(Sort.Order.desc("createdDate")));
+        return prescriptionList.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
     // ==================== CONVERTER METHODS ====================
 
-    private PrescriptionResponse convertToResponse(Prescription prescription, Long invoiceId) {
+    private Double getTotalPromotionAmount(List<MedicineInPromotion> medicineInPromotions, Double price) {
+        Double totalPromotionAmount = 0.0;
+        for (MedicineInPromotion item : medicineInPromotions) {
+            if(!item.getPromotion().getIsDeleted()){
+                if(item.getPromotion().getType().equals("PERCENT")){
+                    totalPromotionAmount += (item.getPromotion().getValue() * price);
+                }
+                else if(item.getPromotion().getType().equals("CASH")){
+                    totalPromotionAmount += item.getPromotion().getValue();
+                }
+            }
+        }
+        return totalPromotionAmount;
+    }
+
+    private PrescriptionResponse convertToResponse(Prescription prescription) {
         // Get prescription items
         List<PrescriptionItem> items = prescriptionItemRepository.findByPrescriptionId(prescription.getId());
         List<PrescriptionItemResponse> itemResponses = items.stream()
@@ -276,8 +382,10 @@ public class PrescriptionService {
                 .id(prescription.getId())
                 .note(prescription.getNotes())
                 .createdDate(prescription.getCreatedDate())
-                .invoiceId(invoiceId)
+                .invoiceId(prescription.getInvoice() != null ? prescription.getInvoice().getId() : null)
                 .items(itemResponses)
+                .doctorId(prescription.getDoctor() != null ? prescription.getDoctor().getId() : null)
+                .doctorName(prescription.getDoctor() != null ? prescription.getDoctor().getFullname() : null)
                 .totalAmount(totalAmount)
                 .itemCount(items.size())
                 .build();
@@ -302,4 +410,7 @@ public class PrescriptionService {
                 .prescriptionId(item.getPrescription().getId())
                 .build();
     }
+
+
+
 }

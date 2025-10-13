@@ -23,7 +23,7 @@ public class VaccinationRecord {
     private String notes;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private String status;     // SCHEDULED, PENDING, COMPLETED, MISSED, CANCELLED, OVERREACTED
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Doctorid", nullable = false)

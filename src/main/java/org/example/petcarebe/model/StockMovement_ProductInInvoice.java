@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "stockmovement_productininvoice")
@@ -14,11 +15,14 @@ public class StockMovement_ProductInInvoice  { //implements Serializable
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "StockMovementid")
     private StockMovement stockMovement;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_in_invoice_id")
     private ProductInInvoice productInInvoice;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }
 

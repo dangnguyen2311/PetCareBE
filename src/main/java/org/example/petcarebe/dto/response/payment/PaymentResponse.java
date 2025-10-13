@@ -18,21 +18,17 @@ public class PaymentResponse {
     private LocalDate paymentDate;
     private Double amount;
     private String method;
-    private PaymentStatus status;
+    private PaymentStatus status; //PENDING, PROCESSING, SUCCESS, FAILED, CANCELLED, REFUNDED, PARTIAL_REFUND, EXPIRED, DECLINED
     private String statusDisplayName;
     private String transactionCode;
     
     // Invoice information
     private Long invoiceId;
-    private String invoiceCode;
-    
-    // Customer information (for admin view)
-    private Long customerId;
-    private String customerName;
-    private String customerEmail;
     
     // Additional fields
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String messgae;
 }

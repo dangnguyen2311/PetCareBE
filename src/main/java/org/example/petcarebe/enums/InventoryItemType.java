@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum InventoryItemType
 {
-    MEDICINE("Medicine", "Pharmaceutical drugs and medications"),
-    PRODUCT("Product", "Pet care products and accessories"),
-    VACCINE("Vaccine", "Vaccines for disease prevention");
+    MEDICINE("MEDICINE", "Pharmaceutical drugs and medications"),
+    PRODUCT("PRODUCT", "Pet care products and accessories"),
+    VACCINE("VACCINE", "Vaccines for disease prevention");
 
     private final String displayName;
     private final String description;

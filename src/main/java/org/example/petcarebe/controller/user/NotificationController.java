@@ -6,9 +6,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.example.petcarebe.dto.request.notification.CreateNotificationBroadcastRequest;
 import org.example.petcarebe.dto.request.notification.CreateNotificationRequest;
 import org.example.petcarebe.dto.request.notification.UpdateNotificationStatusRequest;
+import org.example.petcarebe.dto.response.notification.BroadcastNotificationResponse;
 import org.example.petcarebe.dto.response.notification.NotificationResponse;
+import org.example.petcarebe.model.Notification;
 import org.example.petcarebe.service.NotificationService;
 import org.example.petcarebe.service.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -54,6 +59,54 @@ public class NotificationController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/notification/{username}")
+    public ResponseEntity<?> sendTestNotification(@PathVariable String username) {
+        NotificationResponse notification = new NotificationResponse();
+        notification.setId(System.currentTimeMillis());
+        notification.setTitle("Test Notification");
+        notification.setMessage("This is a test notification sent at " +
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        notification.setType("info");
+
+        webSocketNotificationService.sendNotificationToUserName(username, notification);
+
+        return ResponseEntity.ok("Private Notification sent to " + username);
+    }
+
+    @Operation(
+            summary = "Send broadcast notification",
+            description = "Send a notification to all connected users via WebSocket"
+    )
+    @PostMapping("/broadcast")
+    public ResponseEntity<BroadcastNotificationResponse> broadcastNotification(
+            @RequestBody CreateNotificationBroadcastRequest request
+            ) {
+        try {
+            BroadcastNotificationResponse response = webSocketNotificationService.sendBroadcastNotification(request);
+//            return ResponseEntity.ok(Map.of("message", "Broadcast notification sent successfully"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        catch (RuntimeException e) {
+            BroadcastNotificationResponse error = new BroadcastNotificationResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+        catch (Exception e) {
+            BroadcastNotificationResponse error = new BroadcastNotificationResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/broadcast-2")
+    public ResponseEntity<?> sendBroadcastNotification() {
+        webSocketNotificationService.notifySystemMaintenance(
+                "Hệ thống sẽ bảo trì từ 22:00 - 23:00 hôm nay. Vui lòng lưu công việc."
+        );
+
+        return ResponseEntity.ok("Broadcast notification sent");
     }
 
     @Operation(
@@ -274,33 +327,7 @@ public class NotificationController {
         }
     }
 
-    @Operation(
-            summary = "Send broadcast notification",
-            description = "Send a notification to all connected users via WebSocket"
-    )
-    @PostMapping("/broadcast")
-    public ResponseEntity<Map<String, String>> broadcastNotification(
-            @Parameter(description = "Notification title", required = true)
-            @RequestParam String title,
-            @Parameter(description = "Notification message", required = true)
-            @RequestParam String message,
-            @Parameter(description = "Notification type", example = "INFO")
-            @RequestParam(defaultValue = "INFO") String type) {
-        try {
-            NotificationResponse notification = NotificationResponse.builder()
-                    .title(title)
-                    .message(message)
-                    .type(type)
-                    .isRead(false)
-                    .responseMessage("Broadcast notification sent successfully")
-                    .build();
 
-            webSocketNotificationService.sendNotificationToAll(notification);
-            return ResponseEntity.ok(Map.of("message", "Broadcast notification sent successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
 
     @Operation(
             summary = "Send appointment reminder",

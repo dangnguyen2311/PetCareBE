@@ -1,6 +1,7 @@
 package org.example.petcarebe.dto.response.pet;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class PetResponse {
     private Long id;
     private String name;
@@ -21,5 +23,8 @@ public class PetResponse {
     private Long animalTypeId;
     private String animalTypeName; // Example of adding more useful data
     private Long customerId;
+    private String customerName;
+    private String customerPhone;
+    private String customerEmail;
 }
 

@@ -14,10 +14,11 @@ import java.time.LocalDate;
 public class TestResultResponse {
     
     private Long id;
-    private String testType;
+    private String testType; //BLOOD_TEST, URINE_TEST, FECAL_TEST, PARASITOLOGY, POINT_OF_CARE, IMAGING
     private String result;
     private LocalDate createdDate;
     private String notes;
+    private String status; //NORMAL, ABNORMAL
     
     // Visit information
     private Long visitId;

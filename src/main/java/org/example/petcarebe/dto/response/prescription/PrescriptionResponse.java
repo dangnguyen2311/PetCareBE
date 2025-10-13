@@ -17,6 +17,8 @@ public class PrescriptionResponse {
     private LocalDate createdDate;
     private String note;
     private Long invoiceId;
+    private Long doctorId;
+    private String doctorName;
     private List<PrescriptionItemResponse> items;
     private Double totalAmount; // Sum of all prescription items
     private Integer itemCount; // Number of items in prescription

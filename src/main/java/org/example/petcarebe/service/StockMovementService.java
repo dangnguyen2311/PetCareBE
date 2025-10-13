@@ -1,14 +1,12 @@
 package org.example.petcarebe.service;
 
-import org.example.petcarebe.dto.request.stockmovement.CreateStockMovementPrescriptionItemRequest;
-import org.example.petcarebe.dto.request.stockmovement.CreateStockMovementProductRequest;
-import org.example.petcarebe.dto.request.stockmovement.CreateStockMovementRequest;
-import org.example.petcarebe.dto.request.stockmovement.CreateStockMovementVaccineRequest;
+import org.example.petcarebe.dto.request.stockmovement.*;
 import org.example.petcarebe.dto.response.stockmovement.*;
 import org.example.petcarebe.enums.StockMovementType;
 import org.example.petcarebe.model.*;
 import org.example.petcarebe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +42,13 @@ public class StockMovementService {
     @Autowired
     private VaccineInInvoiceRepository vaccineInInvoiceRepository;
 
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private VaccineRepository vaccineRepository;
+    @Autowired
+    private MedicineRepository medicineRepository;
+
 
     public StockMovementResponse getStockMovementById(Long stockMovementId) {
         StockMovement stockMovement = stockMovementRepository.findById(stockMovementId).
@@ -55,6 +60,12 @@ public class StockMovementService {
         List<StockMovement> stockMovements = stockMovementRepository.findAll();
         return stockMovements.stream()
                 .map(this::convertToStockMovementResponse)
+                .toList();
+    }
+
+    public List<StockMovementResponse> getAllStockMovementsRange(LocalDate fromDate, LocalDate toDate) {
+        return stockMovementRepository.findAllByMovementDateBetween(fromDate.atStartOfDay(), toDate.atTime(23, 59, 59), Sort.by(Sort.Direction.DESC, "movementDate"))
+                .stream().map(this::convertToStockMovementResponse)
                 .toList();
     }
 
@@ -88,7 +99,7 @@ public class StockMovementService {
         return convertToStockMovementPrescriptionItemResponse(savedStockMovement, savedStockMovementPrescriptionItem);
 
     }
-    public CreateStockMovementProductResponse createStockMovementProduct(CreateStockMovementProductRequest request) {
+    public CreateStockMovementProductInInvoiceResponse createStockMovementProductInInvoice(CreateStockMovementProductInInvoiceRequest request) {
         InventoryItem inventoryItem = inventoryItemRepository.findById(request.getInventoryItemId()).
                 orElseThrow(() -> new RuntimeException("InventoryItem Not Found"));
 
@@ -109,7 +120,6 @@ public class StockMovementService {
         ProductInInvoice  productInInvoice = productInInvoiceRepository.findById(request.getProductInInvoiceId())
                 .orElseThrow(() -> new RuntimeException("ProductInInvoice Not Found"));
 
-
         StockMovement_ProductInInvoice stockMovementProductInInvoice= new StockMovement_ProductInInvoice();
         stockMovementProductInInvoice.setStockMovement(savedStockMovement);
         stockMovementProductInInvoice.setProductInInvoice(productInInvoice);
@@ -119,7 +129,7 @@ public class StockMovementService {
         return convertToStockMovementProductInInvoiceResponse(savedStockMovement, savedStockMovementProductInInvoice);
 
     }
-    public CreateStockMovementVaccineResponse createStockMovementVaccine(CreateStockMovementVaccineRequest request) {
+    public CreateStockMovementVaccineInInvoiceResponse createStockMovementVaccineInInvoice(CreateStockMovementVaccineInInvoiceRequest request) {
         InventoryItem inventoryItem = inventoryItemRepository.findById(request.getInventoryItemId()).
                 orElseThrow(() -> new RuntimeException("InventoryItem Not Found"));
 
@@ -171,6 +181,77 @@ public class StockMovementService {
         stockMovement.setNotes(request.getNotes());
         StockMovement savedStockMovement = stockMovementRepository.save(stockMovement);
         return convertToCreateStockMovementResponse(savedStockMovement, "StockMovement created successfully");
+    }
+
+    public CreateStockMovementProductResponse createStockMovementProduct(CreateStockMovementProductRequest request) {
+        Product productById = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product Not Found"));
+
+        InventoryItem inventoryItem = inventoryItemRepository.findByInventoryObject(productById.getInventoryObject())
+                .orElseThrow(() -> new RuntimeException("InventoryItem Not Found"));
+
+        inventoryItem.setQuantity(adjustQuantity(StockMovementType.IN, request.getQuantity(), inventoryItem.getQuantity()));
+        InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItem);
+
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setInventoryItem(savedInventoryItem);
+        stockMovement.setMovementType(StockMovementType.IN);
+        stockMovement.setQuantity(request.getQuantity());
+        stockMovement.setPrice(request.getPrice());
+        stockMovement.setMovementDate(request.getMovementDate());
+        stockMovement.setNotes(request.getNotes());
+        stockMovement.setCreatedAt(LocalDate.now());
+
+        StockMovement savedStockMovement = stockMovementRepository.save(stockMovement);
+        return convertToCreateStockMovementProductResponse(savedStockMovement, productById, "StockMovement created successfully");
+
+    }
+
+    public CreateStockMovementVaccineResponse createStockMovementVaccine(CreateStockMovementVaccineRequest request) {
+        Vaccine vaccineById = vaccineRepository.findById(request.getVaccineId())
+                .orElseThrow(()  -> new RuntimeException("Vaccine Not Found"));
+
+        InventoryItem inventoryItem = inventoryItemRepository.findByInventoryObject(vaccineById.getInventoryObject()).
+                orElseThrow(() -> new RuntimeException("InventoryItem Not Found"));
+
+        inventoryItem.setQuantity(adjustQuantity(StockMovementType.IN, request.getQuantity(), inventoryItem.getQuantity()));
+        InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItem);
+
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setInventoryItem(savedInventoryItem);
+        stockMovement.setMovementType(StockMovementType.IN);
+        stockMovement.setQuantity(request.getQuantity());
+        stockMovement.setPrice(request.getPrice());
+        stockMovement.setMovementDate(request.getMovementDate());
+        stockMovement.setNotes(request.getNotes());
+        stockMovement.setCreatedAt(LocalDate.now());
+
+        StockMovement savedStockMovement = stockMovementRepository.save(stockMovement);
+        return convertToCreateStockMovementVaccineResponse(savedStockMovement, vaccineById, "StockMovement created successfully");
+
+    }
+
+    public CreateStockMovementMedicineResponse createStockMovementMedicine(CreateStockMovementMedicineRequest request) {
+        Medicine medicinebyId = medicineRepository.findById(request.getMedicineId())
+                .orElseThrow(() -> new RuntimeException("Medicine Not Found"));
+
+        InventoryItem inventoryItem = inventoryItemRepository.findByInventoryObject(medicinebyId.getInventoryObject()).
+                orElseThrow(() -> new RuntimeException("InventoryItem Not Found"));
+        inventoryItem.setQuantity(adjustQuantity(StockMovementType.IN, request.getQuantity(), inventoryItem.getQuantity()));
+        InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItem);
+
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setInventoryItem(savedInventoryItem);
+        stockMovement.setMovementType(StockMovementType.IN);
+        stockMovement.setQuantity(request.getQuantity());
+        stockMovement.setPrice(request.getPrice());
+        stockMovement.setMovementDate(request.getMovementDate());
+        stockMovement.setNotes(request.getNotes());
+        stockMovement.setCreatedAt(LocalDate.now());
+
+        StockMovement savedStockMovement = stockMovementRepository.save(stockMovement);
+        return convertToCreateStockMovementMedicineResponse(savedStockMovement, medicinebyId, "StockMovement created successfully");
+
     }
 
     private Integer adjustQuantity(StockMovementType type, Integer requestQuantity, Integer inventoryItemQuantity) {
@@ -232,8 +313,8 @@ public class StockMovementService {
                 .message(message)
                 .build();
     }
-    private CreateStockMovementProductResponse convertToStockMovementProductInInvoiceResponse(StockMovement stockMovement, StockMovement_ProductInInvoice stockMovement_ProductInInvoice) {
-        return CreateStockMovementProductResponse.builder()
+    private CreateStockMovementProductInInvoiceResponse convertToStockMovementProductInInvoiceResponse(StockMovement stockMovement, StockMovement_ProductInInvoice stockMovement_ProductInInvoice) {
+        return CreateStockMovementProductInInvoiceResponse.builder()
                 .id(stockMovement.getId())
                 .movementType(stockMovement.getMovementType())
                 .quantity(stockMovement.getQuantity())
@@ -254,8 +335,8 @@ public class StockMovementService {
                 .message("")
                 .build();
     }
-    private CreateStockMovementProductResponse convertToStockMovementProductInInvoiceResponse(StockMovement stockMovement, StockMovement_ProductInInvoice stockMovement_ProductInInvoice, String message) {
-        return CreateStockMovementProductResponse.builder()
+    private CreateStockMovementProductInInvoiceResponse convertToStockMovementProductInInvoiceResponse(StockMovement stockMovement, StockMovement_ProductInInvoice stockMovement_ProductInInvoice, String message) {
+        return CreateStockMovementProductInInvoiceResponse.builder()
                 .id(stockMovement.getId())
                 .movementType(stockMovement.getMovementType())
                 .quantity(stockMovement.getQuantity())
@@ -276,8 +357,8 @@ public class StockMovementService {
                 .message(message)
                 .build();
     }
-    private CreateStockMovementVaccineResponse convertToStockMovementVaccineInInvoiceResponse(StockMovement stockMovement, StockMovement_VaccineInInvoice stockMovement_VaccineInInvoice) {
-        return CreateStockMovementVaccineResponse.builder()
+    private CreateStockMovementVaccineInInvoiceResponse convertToStockMovementVaccineInInvoiceResponse(StockMovement stockMovement, StockMovement_VaccineInInvoice stockMovement_VaccineInInvoice) {
+        return CreateStockMovementVaccineInInvoiceResponse.builder()
                 .id(stockMovement.getId())
                 .movementType(stockMovement.getMovementType())
                 .quantity(stockMovement.getQuantity())
@@ -297,8 +378,8 @@ public class StockMovementService {
 
     }
 
-    private CreateStockMovementVaccineResponse convertToStockMovementVaccineInInvoiceResponse(StockMovement stockMovement, StockMovement_VaccineInInvoice stockMovement_VaccineInInvoice, String message) {
-        return CreateStockMovementVaccineResponse.builder()
+    private CreateStockMovementVaccineInInvoiceResponse convertToStockMovementVaccineInInvoiceResponse(StockMovement stockMovement, StockMovement_VaccineInInvoice stockMovement_VaccineInInvoice, String message) {
+        return CreateStockMovementVaccineInInvoiceResponse.builder()
                 .id(stockMovement.getId())
                 .movementType(stockMovement.getMovementType())
                 .quantity(stockMovement.getQuantity())
@@ -384,6 +465,126 @@ public class StockMovementService {
                 .build();
     }
 
+    private CreateStockMovementProductResponse convertToCreateStockMovementProductResponse(StockMovement stockMovement, Product product) {
+        return CreateStockMovementProductResponse.builder()
+                .id(stockMovement.getId())
+                .movementType(stockMovement.getMovementType())
+                .quantity(stockMovement.getQuantity())
+                .price(stockMovement.getPrice())
+                .movementDate(stockMovement.getMovementDate())
+                .notes(stockMovement.getNotes())
+                .createdAt(stockMovement.getCreatedAt())
+                .updatedAt(stockMovement.getUpdatedAt())
+                .inventoryItemId(stockMovement.getInventoryItem() != null ?  stockMovement.getInventoryItem().getId(): null)
+                .inventoryItemName(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getName() : null)
+                .inventoryItemUnit(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getUnit() : null)
+                .productId(product.getId())
+                .productName(product.getName())
+                .productUnit(product.getUnit())
+                .productCategory(product.getCategory())
+                .productBrand(product.getBrand())
+                .productSupplier(product.getSupplier())
+                .message("")
+                .build();
+    }
+    private CreateStockMovementProductResponse convertToCreateStockMovementProductResponse(StockMovement stockMovement, Product product, String message) {
+        return CreateStockMovementProductResponse.builder()
+                .id(stockMovement.getId())
+                .movementType(stockMovement.getMovementType())
+                .quantity(stockMovement.getQuantity())
+                .price(stockMovement.getPrice())
+                .movementDate(stockMovement.getMovementDate())
+                .notes(stockMovement.getNotes())
+                .createdAt(stockMovement.getCreatedAt())
+                .updatedAt(stockMovement.getUpdatedAt())
+                .inventoryItemId(stockMovement.getInventoryItem() != null ?  stockMovement.getInventoryItem().getId(): null)
+                .inventoryItemName(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getName() : null)
+                .inventoryItemUnit(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getUnit() : null)
+                .productId(product.getId())
+                .productName(product.getName())
+                .productUnit(product.getUnit())
+                .productCategory(product.getCategory())
+                .productBrand(product.getBrand())
+                .productSupplier(product.getSupplier())
+                .message("")
+                .build();
+    }
 
+    private CreateStockMovementVaccineResponse convertToCreateStockMovementVaccineResponse(StockMovement stockMovement, Vaccine vaccine) {
+        return CreateStockMovementVaccineResponse.builder()
+                .id(stockMovement.getId())
+                .movementType(stockMovement.getMovementType())
+                .quantity(stockMovement.getQuantity())
+                .price(stockMovement.getPrice())
+                .movementDate(stockMovement.getMovementDate())
+                .notes(stockMovement.getNotes())
+                .createdAt(stockMovement.getCreatedAt())
+                .updatedAt(stockMovement.getUpdatedAt())
+                .inventoryItemId(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getId() : null)
+                .inventoryItemName(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getName() : null)
+                .inventoryItemUnit(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getUnit() : null)
+                .vaccineName(vaccine.getName())
+                .vaccineDescription(vaccine.getDescription())
+                .vaccineManufacturer(vaccine.getManufacturer())
+                .message("")
+                .build();
+    }
+    private CreateStockMovementVaccineResponse convertToCreateStockMovementVaccineResponse(StockMovement stockMovement, Vaccine vaccine, String message) {
+        return CreateStockMovementVaccineResponse.builder()
+                .id(stockMovement.getId())
+                .movementType(stockMovement.getMovementType())
+                .quantity(stockMovement.getQuantity())
+                .price(stockMovement.getPrice())
+                .movementDate(stockMovement.getMovementDate())
+                .notes(stockMovement.getNotes())
+                .createdAt(stockMovement.getCreatedAt())
+                .updatedAt(stockMovement.getUpdatedAt())
+                .inventoryItemId(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getId() : null)
+                .inventoryItemName(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getName() : null)
+                .inventoryItemUnit(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getUnit() : null)
+                .vaccineName(vaccine.getName())
+                .vaccineDescription(vaccine.getDescription())
+                .vaccineManufacturer(vaccine.getManufacturer())
+                .message(message)
+                .build();
+    }
 
+    private CreateStockMovementMedicineResponse convertToCreateStockMovementMedicineResponse(StockMovement stockMovement, Medicine medicine) {
+        return CreateStockMovementMedicineResponse.builder()
+                .id(stockMovement.getId())
+                .movementType(stockMovement.getMovementType())
+                .quantity(stockMovement.getQuantity())
+                .price(stockMovement.getPrice())
+                .movementDate(stockMovement.getMovementDate())
+                .notes(stockMovement.getNotes())
+                .createdAt(stockMovement.getCreatedAt())
+                .updatedAt(stockMovement.getUpdatedAt())
+                .inventoryItemId(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getId() : null)
+                .inventoryItemName(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getName() : null)
+                .inventoryItemUnit(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getUnit() : null)
+                .medicineName(medicine.getName())
+                .medicineUnit(medicine.getUnit())
+                .medicineDescription(medicine.getDescription())
+                .message("")
+                .build();
+    }
+    private CreateStockMovementMedicineResponse convertToCreateStockMovementMedicineResponse(StockMovement stockMovement, Medicine medicine, String message) {
+        return CreateStockMovementMedicineResponse.builder()
+                .id(stockMovement.getId())
+                .movementType(stockMovement.getMovementType())
+                .quantity(stockMovement.getQuantity())
+                .price(stockMovement.getPrice())
+                .movementDate(stockMovement.getMovementDate())
+                .notes(stockMovement.getNotes())
+                .createdAt(stockMovement.getCreatedAt())
+                .updatedAt(stockMovement.getUpdatedAt())
+                .inventoryItemId(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getId() : null)
+                .inventoryItemName(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getName() : null)
+                .inventoryItemUnit(stockMovement.getInventoryItem() != null ? stockMovement.getInventoryItem().getUnit() : null)
+                .medicineName(medicine.getName())
+                .medicineUnit(medicine.getUnit())
+                .medicineDescription(medicine.getDescription())
+                .message(message)
+                .build();
+    }
 }

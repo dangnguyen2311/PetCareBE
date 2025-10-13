@@ -33,7 +33,7 @@ public abstract class AbstractInvoiceItem {
         return getQuantity() * getPrice();
     }
     public Double getTaxAmount() {
-        return taxPercent == null ? 0.0 : taxPercent*quantity*price;
+        return getTotalPrice() * (getTaxPercent() / 100.0);
     }
 
 }

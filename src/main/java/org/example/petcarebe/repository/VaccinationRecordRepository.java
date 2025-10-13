@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @Repository
-public interface   VaccinationRecordRepository extends JpaRepository<VaccinationRecord,Integer> {
+public interface   VaccinationRecordRepository extends JpaRepository<VaccinationRecord,Long> {
     Integer getVaccinationRecordsByStatus(String status, Sort sort);
 
     List<VaccinationRecord> findAllByPet(Pet pet);

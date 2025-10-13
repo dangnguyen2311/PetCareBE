@@ -1,5 +1,7 @@
 package org.example.petcarebe.util;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
@@ -8,8 +10,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class VnpayUtil {
-
+public class VNPayUtil {
     public static String hmacSHA512(final String key, final String data) {
         try {
             if (key == null || data == null) {
@@ -27,12 +28,12 @@ public class VnpayUtil {
             }
             return sb.toString();
 
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate HMAC-SHA512", e);
+        } catch (Exception ex) {
+            return "";
         }
     }
 
-    public static String getIpAddress(jakarta.servlet.http.HttpServletRequest request) {
+    public static String getIpAddress(HttpServletRequest request) {
         String ipAdress;
         try {
             ipAdress = request.getHeader("X-FORWARDED-FOR");
@@ -54,17 +55,16 @@ public class VnpayUtil {
         }
         return sb.toString();
     }
-
-    public static String getPaymentUrl(Map<String, String> params, boolean encodeKey) {
-        return params.entrySet().stream()
+    public static String getPaymentURL(Map<String, String> paramsMap, boolean encodeKey) {
+        return paramsMap.entrySet().stream()
                 .filter(entry -> entry.getValue() != null && !entry.getValue().isEmpty())
                 .sorted(Map.Entry.comparingByKey())
-                .map(entry -> {
-                    String key = encodeKey ? URLEncoder.encode(entry.getKey(), StandardCharsets.US_ASCII) : entry.getKey();
-                    String value = URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII);
-                    return key + "=" + value;
-                })
+                .map(entry ->
+                        (encodeKey ? URLEncoder.encode(entry.getKey(),
+                                StandardCharsets.US_ASCII)
+                                : entry.getKey()) + "=" +
+                                URLEncoder.encode(entry.getValue()
+                                        , StandardCharsets.US_ASCII))
                 .collect(Collectors.joining("&"));
     }
 }
-

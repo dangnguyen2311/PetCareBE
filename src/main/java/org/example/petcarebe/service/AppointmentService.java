@@ -1,5 +1,6 @@
 package org.example.petcarebe.service;
 
+import jakarta.mail.MessagingException;
 import org.example.petcarebe.dto.request.appointment.ConfirmAppointmentRequest;
 import org.example.petcarebe.dto.request.appointment.CreateAppointmentRequest;
 import org.example.petcarebe.dto.request.appointment.GetAppointmentByStatusRequest;
@@ -18,10 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class AppointmentService {
@@ -34,10 +32,15 @@ public class AppointmentService {
     @Autowired
     private WorkScheduleRepository workScheduleRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Value("${expired.date}")
     private Long expiredDate;
+    @Value("example.email")
+    private String exampleEmail;
 
-    public CreateAppointmentResponse createAppointment(CreateAppointmentRequest request) {
+    public CreateAppointmentResponse createAppointment(CreateAppointmentRequest request) throws MessagingException {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer Not Found"));
 
@@ -50,7 +53,15 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.PENDING);
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
-
+        Map<String, Object> data = new HashMap<>();
+        data.put("customerName", customer.getFullname());
+        data.put("customerEmail", customer.getEmail() != null ? customer.getEmail() : "");
+        data.put("customerAddress", customer.getAddress());
+        data.put("reason", request.getNotes());
+        data.put("appointmentDate", request.getAppointmentDate());
+        data.put("appointmentTime", request.getAppointmentTime());
+        data.put("location", "Phòng khám thú cưng ABC");
+        emailService.sendAppointmentPendingEmail(customer.getEmail() != null ? customer.getEmail() : exampleEmail, data);
         return convertToCreateResponse(savedAppointment, "Appointment Created Successfully");
 
     }
@@ -138,7 +149,7 @@ public class AppointmentService {
         return convertToAppointmentResponse(savedAppointment, "Appointment status has been updated to No show");
     }
 
-    public AppointmentResponse confirmAppointment(Long appointmentId, ConfirmAppointmentRequest request) {
+    public AppointmentResponse confirmAppointment(Long appointmentId, ConfirmAppointmentRequest request) throws MessagingException {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new RuntimeException("Appointment Not Found"));
         WorkSchedule workSchedule = workScheduleRepository.findById(request.getWorkScheduleId()).orElseThrow(() -> new RuntimeException("Work Schedule Not Found"));
         appointment.setQueueNumber(createQueueNumber(workSchedule));
@@ -146,6 +157,19 @@ public class AppointmentService {
         appointment.setWorkSchedule(workSchedule);
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("customerName", appointment.getCustomer().getFullname());
+        data.put("customerEmail", appointment.getCustomer().getEmail());
+        data.put("customerPhone", appointment.getCustomer().getPhone());
+        data.put("reason", appointment.getNotes());
+        data.put("appointmentDate", appointment.getAppointmentDate());
+        data.put("appointmentTime", appointment.getAppointmentTime());
+        data.put("doctorName", appointment.getWorkSchedule().getDoctor().getFullname());
+        data.put("room", "Phong 01");
+        data.put("queueNumber", appointment.getQueueNumber());
+
+        emailService.sendAppointmentConfirmationEmail(appointment.getCustomer() != null ? appointment.getCustomer().getEmail() : exampleEmail, data);
         return convertToAppointmentResponse(savedAppointment, "Appointment has been confirmed");
     }
 
@@ -180,6 +204,11 @@ public class AppointmentService {
         List<Appointment> appointmentList = appointmentRepository.findAll();
         return appointmentList.stream().map(this::convertToAppointmentResponse).toList();
     }
+    public void deleteAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new RuntimeException("Appointment Not Found"));
+        appointmentRepository.delete(appointment);
+    }
+
 
     private CreateAppointmentResponse convertToCreateResponse(Appointment appointment) {
         return CreateAppointmentResponse.builder()
@@ -246,6 +275,13 @@ public class AppointmentService {
 
     }
 
+
+    public List<AppointmentResponse> getAppointmentByDoctor(Long doctorId) {
+        List<Appointment> responses = appointmentRepository.findAllByDoctorId(doctorId);
+        return responses.stream()
+                .map(this::convertToAppointmentResponse)
+                .toList();
+    }
 
 
 }

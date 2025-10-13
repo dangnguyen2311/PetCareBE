@@ -22,7 +22,7 @@ public class AnimalTypeController {
         return ResponseEntity.ok(animalTypeService.createAnimalType(request));
     }
 
-    @GetMapping("/getlist")
+    @GetMapping()
     public ResponseEntity<List<AnimalTypeResponse>> getAnimalTypeList() {
         return ResponseEntity.ok(animalTypeService.getAnimalTypes());
     }

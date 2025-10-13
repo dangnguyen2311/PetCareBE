@@ -1,12 +1,10 @@
 package org.example.petcarebe.service;
 
+import org.example.petcarebe.config.CloudinaryConfig;
 import org.example.petcarebe.dto.request.pet.*;
 
 import org.example.petcarebe.dto.response.activity.DailyActivityResponse;
-import org.example.petcarebe.dto.response.pet.PetFoodRecordResponse;
-import org.example.petcarebe.dto.response.pet.PetImageRecordResponse;
-import org.example.petcarebe.dto.response.pet.PetResponse;
-import org.example.petcarebe.dto.response.pet.PetWeightRecordResponse;
+import org.example.petcarebe.dto.response.pet.*;
 import org.example.petcarebe.model.*;
 import org.example.petcarebe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,8 @@ public class PetService {
 
     @Autowired
     private PetRepository petRepository;
+    @Autowired
+    private ImageUploadService imageService;
     @Autowired
     private ImageUploadService imageUploadService;
 
@@ -87,6 +87,35 @@ public class PetService {
 
         medicalRecordRepository.save(medicalRecord);
         return convertToResponse(savedPet);
+    }
+
+    public CreatePetAndCustomerResponse createPetAndCustomer(CreatePetAndCustomerRequest request) {
+        Customer customer = new Customer();
+        Pet pet = new Pet();
+
+        customer.setFullname(request.getName());
+        customer.setEmail(request.getCustomerEmail());
+        customer.setPhone(request.getCustomerPhone());
+        customer.setGender(request.getGender().toUpperCase());
+        customer.setAddress(request.getCustomerAddress());
+        customer.setCreatedDate(LocalDate.now());
+        customer.setDateOfBirth(request.getDateOfBirth());
+        customer.setStatus("ACTIVE");
+        Customer savedCustomer = customerRepository.save(customer);
+
+        Optional<AnimalType> animalType = animalTypeRepository.findById(request.getAnimalTypeId());
+        pet.setName(request.getName());
+        pet.setBreed(request.getBreed());
+        pet.setGender(request.getGender().toUpperCase());
+        pet.setDatebirth(request.getDateOfBirth());
+        pet.setColor(request.getColor());
+        pet.setCreatedDate(LocalDate.now());
+        pet.setIsDeleted(false);
+        pet.setAnimalType(animalType.orElse(null));
+        pet.setCustomer(customer);
+        Pet savedPet = petRepository.save(pet);
+
+        return convertToCreatePetAndCustomer(savedPet, customer, "Pet and Customer created successfully");
     }
 
     public List<PetResponse> getPetsByCustomerId(Long customerId) {
@@ -182,6 +211,19 @@ public class PetService {
     public PetResponse getPetById(Long petId) {
         return convertToResponse(petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found")));
     }
+
+    public PetRecordDailyResponse getPetRecordDaily(Long petId, LocalDate date) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        MedicalRecord medicalRecord = medicalRecordRepository.findByPet(pet)
+                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+        List<PetFoodRecord> petFoodRecordList = petFoodRecordRepository.findAllByMedicalRecord(medicalRecord, Sort.by("id").descending());
+        List<PetWeightRecord> petWeightRecordList = petWeightRecordRepository.findAllByMedicalRecord(medicalRecord, Sort.by("id").descending());
+        List<PetImageRecord> petImageRecordList = petImageRecordRepository.findAllByMedicalRecord(medicalRecord, Sort.by("id").descending());
+
+        return convertToPetRecordDailyResponse(petId, petFoodRecordList, petWeightRecordList, petImageRecordList, "PetRecordDailyResponse created successfully!!!!!!!!!!!");
+    }
+
     public PetFoodRecordResponse createPetFoodRecord(Long petId, CreatePetFoodRecordRequest request) {
         Pet pet =  petRepository.findById(petId)
                 .orElseThrow(() -> new RuntimeException("Pet not found"));
@@ -210,7 +252,9 @@ public class PetService {
         petImageRecord.setMedicalRecord( medicalRecordByPet);
         petImageRecord.setRecordDate(request.getRecordDate());
         petImageRecord.setNotes(request.getNotes());
-        petImageRecord.setImgUrl(request.getImgUrl());
+        String imgUrl = imageService.uploadImage(request.getImage());
+        System.out.println("Link anh: " + imgUrl);
+        petImageRecord.setImgUrl(imgUrl);
 
         PetImageRecord savedPetImageRecord = petImageRecordRepository.save(petImageRecord);
         return convertRecordToResponse(savedPetImageRecord, "PetImageRecord created");
@@ -402,11 +446,68 @@ public class PetService {
                 pet.getColor(),
                 pet.getAnimalType().getId(),
                 pet.getAnimalType().getName(),
-                pet.getCustomer().getId()
+                pet.getCustomer().getId(),
+                pet.getCustomer().getFullname(),
+                pet.getCustomer().getPhone(),
+                pet.getCustomer().getEmail()
 
         );
     }
 
+    private CreatePetAndCustomerResponse convertToCreatePetAndCustomer(Pet pet,  Customer customer) {
+        return CreatePetAndCustomerResponse.builder()
+                .id(pet.getId())
+                .customerId(customer.getId())
+                .customerName(customer.getFullname())
+                .customerPhone(customer.getPhone())
+                .customerEmail(customer.getEmail())
+                .customerAddress(customer.getAddress())
+                .customerGender(customer.getGender())
+                .customerBirthday(customer.getDateOfBirth())
+                .name(pet.getName())
+                .breed(pet.getBreed())
+                .gender(pet.getGender())
+                .dateOfBirth(pet.getDatebirth())
+                .color(pet.getColor())
+                .animalTypeName(pet.getAnimalType() != null ? pet.getAnimalType().getName() : "NONE")
+                .message("")
+                .build();
+    }
+    private CreatePetAndCustomerResponse convertToCreatePetAndCustomer(Pet pet,  Customer customer, String message) {
+        return CreatePetAndCustomerResponse.builder()
+                .id(pet.getId())
+                .customerId(customer.getId())
+                .customerName(customer.getFullname())
+                .customerPhone(customer.getPhone())
+                .customerEmail(customer.getEmail())
+                .customerAddress(customer.getAddress())
+                .customerGender(customer.getGender())
+                .customerBirthday(customer.getDateOfBirth())
+                .name(pet.getName())
+                .breed(pet.getBreed())
+                .gender(pet.getGender())
+                .dateOfBirth(pet.getDatebirth())
+                .color(pet.getColor())
+                .animalTypeName(pet.getAnimalType() != null ? pet.getAnimalType().getName() : "NONE")
+                .message(message)
+                .build();
+    }
+
+    public PetRecordDailyResponse convertToPetRecordDailyResponse(
+            Long petId,
+            List<PetFoodRecord> petFoodRecords,
+            List<PetWeightRecord> petWeightRecords,
+            List<PetImageRecord> petImageRecords,
+            String message
+    ) {
+        return PetRecordDailyResponse.builder()
+                .petId(petId)
+                .petFoodRecords(petFoodRecords.stream().map(this::convertRecordToResponse).toList())
+                .petWeightRecords(petWeightRecords.stream().map(this::convertRecordToResponse).toList())
+                .petImageRecords(petImageRecords.stream().map(this::convertRecordToResponse).toList())
+                .message(message)
+                .build();
+    }
 
     public DailyActivityResponse getDailyActivities(Long petId, LocalDate date) {
         // Bổ sung sau
@@ -416,6 +517,8 @@ public class PetService {
     public List<DailyActivityResponse> getActivitiesInRange(Long petId, LocalDate startDate, LocalDate endDate) {
         return new ArrayList<>();
     }
+
+
 
 }
 

@@ -1,13 +1,28 @@
 package org.example.petcarebe.service;
 
+import jakarta.persistence.PersistenceException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.petcarebe.dto.request.invoice.*;
+import org.example.petcarebe.dto.request.payment.ConfirmPaymentFailedRequest;
+import org.example.petcarebe.dto.request.payment.ConfirmPaymentSuccessRequest;
+import org.example.petcarebe.dto.request.payment.CreatePaymentRequest;
 import org.example.petcarebe.dto.response.invoice.*;
+import org.example.petcarebe.dto.response.payment.CreatePaymentResponse;
+import org.example.petcarebe.dto.response.payment.PaymentResponse;
+import org.example.petcarebe.dto.response.prescription.PrescriptionItemResponse;
+import org.example.petcarebe.dto.response.prescription.PrescriptionResponse;
+import org.example.petcarebe.dto.response.vaccine.VaccineInInvoiceResponse;
 import org.example.petcarebe.enums.InvoiceStatus;
+import org.example.petcarebe.enums.PaymentStatus;
 import org.example.petcarebe.enums.StockMovementType;
 import org.example.petcarebe.model.*;
+import org.example.petcarebe.model.dto.PrescriptionItemDTO;
+import org.example.petcarebe.payment.PaymentRequest;
 import org.example.petcarebe.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,6 +48,8 @@ public class InvoiceService {
     private CustomerRepository customerRepository;
     @Autowired
     private StaffRepository staffRepository;
+    @Autowired
+    private PaymentRepository paymentRepository;
     @Autowired
     private ServiceRepository serviceRepository;
     @Autowired
@@ -105,9 +122,38 @@ public class InvoiceService {
         return convertToCreateInvoiceResponse(savedInvoice);
 
     }
+    public InvoiceResponse updateStatus(InvoiceStatus invoiceStatus, Long invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found with id:m " + invoiceId));
+        invoice.setStatus(invoiceStatus);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+//        checkPriceInvoice(savedInvoice.getId());
+        return convertToResponse(savedInvoice);
+    }
+
+    public InvoiceResponse getInvoiceById(Long invoiceId) {
+        Invoice invoiceById = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        return convertToResponse(invoiceById);
+    }
 
     public List<InvoiceResponse> getAllInvoice() {
         return invoiceRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
+    public List<InvoiceResponse> getInvoicesByParam(InvoiceStatus status, LocalDate fromDate, LocalDate toDate) {
+        if (fromDate == null) {
+            fromDate = LocalDate.of(1970, 1, 1); // hoặc ngày nhỏ nhất
+        }
+        if (toDate == null) {
+            toDate = LocalDate.now(); // lấy ngày hiện tại
+        }
+        if(status != null) return invoiceRepository.findAllByStatusAndCreatedDateBetween(status, fromDate, toDate, Sort.by(Sort.Direction.ASC, "id")).stream()
+                .map(this::convertToResponse)
+                .toList();
+        return invoiceRepository.findAllByCreatedDateBetween(fromDate, toDate, Sort.by(Sort.Direction.ASC, "id")).stream()
                 .map(this::convertToResponse)
                 .toList();
     }
@@ -182,6 +228,45 @@ public class InvoiceService {
         List<Invoice> invoiceList = invoiceRepository.getInvoicesByCustomer(customer);
         return invoiceList.stream().map(this::convertToResponse).collect(Collectors.toList());
     }
+
+    public InvoiceItemsResponse getInvoiceItems(Long invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("invoice not found"));
+        Optional<Prescription> prescriptionOptional = prescriptionRepository.findByInvoiceId(invoice.getId());
+
+        System.out.println("DOn thuoc trong hoa don " + prescriptionOptional.isEmpty());
+
+        List<PrescriptionItem> prescriptionItems = new ArrayList<>(); //
+        List<ProductInInvoice> productInInvoiceList;
+        List<ServiceInInvoice> serviceInInvoiceList = new ArrayList<>();
+        List<VaccineInInvoice> vaccineInInvoiceList = new ArrayList<>();
+        List<InvoiceDiscount>  invoiceDiscountList = new ArrayList<>();
+        List<ServicePackageInInvoice>  servicePackageInInvoiceList = new ArrayList<>();
+        List<Payment> paymentList = new ArrayList<>();
+        Prescription prescription = new Prescription();
+        if(prescriptionOptional.isPresent()) {
+            prescription = prescriptionOptional.get();
+            prescriptionItems = prescriptionItemRepository.findAllByPrescription(prescription);
+        }
+        productInInvoiceList = productInInvoiceRepository.findAllByInvoice(invoice);
+        serviceInInvoiceList = serviceInInvoiceRepository.findAllByInvoice(invoice);
+        servicePackageInInvoiceList = servicePackageInInvoiceRepository.findAllByInvoice(invoice);
+        invoiceDiscountList = invoiceDiscountRepository.findAllByInvoice(invoice);
+        vaccineInInvoiceList = vaccineInInvoiceRepository.findAllByInvoice(invoice);
+        paymentList = paymentRepository.findAllByInvoice(invoice);
+        return convertToInvoiceItemsResponse(
+                invoiceId,
+                paymentList,
+                productInInvoiceList,
+                servicePackageInInvoiceList,
+                serviceInInvoiceList,
+                invoiceDiscountList,
+                prescription,
+                prescriptionItems,
+                vaccineInInvoiceList,
+                "InvoiceItems found successfully"
+                );
+    }
     // Your service methods will go here
     public AddServiceToInvoiceResponse addServiceToInvoice(Long invoiceId, AddServiceToInvoiceRequest request) {
         Invoice invoiceById = invoiceRepository.findById(invoiceId)
@@ -229,7 +314,7 @@ public class InvoiceService {
                 .orElseThrow(() -> new RuntimeException("Service Package Price History not found"));
 
         ServicePackageInPromotion servicePackageInPromotion = servicePackageInPromotionRepository.findByServicePackage(servicePackageById)
-                .orElseThrow(() -> new RuntimeException("Service Package In Promotion not found"));
+                .orElse(null);
 
         ServicePackageInInvoice servicePackageInInvoice = new ServicePackageInInvoice();
         servicePackageInInvoice.setServicePackage(servicePackageById);
@@ -260,9 +345,9 @@ public class InvoiceService {
                 .orElseThrow(() -> new RuntimeException("product not found"));
 
         ProductPriceHistory productPriceHistory = productPriceHistoryRepository.findByProductAndStatus(productById, "ACTIVE")
-                .orElseThrow(() -> new RuntimeException("product not found"));
+                .orElseThrow(() -> new RuntimeException("product price not found"));
         ProductInPromotion productInPromotion = productInPromotionRepository.findByProduct(productById)
-                .orElseThrow(() -> new RuntimeException("product not found"));
+                .orElse(null);
 
 //        InventoryObject inventoryObjectByProduct = inventoryObjectRepository.findById(productById.getInventoryObject().getId())
 //                .orElseThrow(() -> new RuntimeException("Inventory Object Of Product not found"));
@@ -365,6 +450,9 @@ public class InvoiceService {
         return convertToAddVaccineToInvoiceResponse(savedvaccineInInvoice);
     }
 
+//    public AddPromotionToInvoiceResponse addPromotionToInvoice(AddPromotionToInvoiceRequest request) {
+//    }
+
     public AddPrescriptionToInvoiceResponse addPrescriptionToInvoice(Long invoiceId, AddPrescriptionToInvoiceRequest request) {
         Invoice invoiceById = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("invoice not found"));
@@ -384,19 +472,24 @@ public class InvoiceService {
         List<ServicePackageInInvoice> servicePackageInInvoices = servicePackageInInvoiceRepository.findAllByInvoice(invoiceById);
         List<ProductInInvoice> productInInvoices = productInInvoiceRepository.findAllByInvoice(invoiceById);
         List<VaccineInInvoice> vaccineInInvoices = vaccineInInvoiceRepository.findAllByInvoice(invoiceById);
-        Optional<Prescription> prescriptionByInvoiceOptional = prescriptionRepository.findByInvoice(invoiceById);
+        Prescription prescriptionByInvoiceOptional= prescriptionRepository.findByInvoice(invoiceById).orElse(null);
         List<InvoiceDiscount> invoiceDiscounts = invoiceDiscountRepository.findAllByInvoice(invoiceById);
-        List<PrescriptionItem> prescriptionItems = new ArrayList<>();
-        if(prescriptionByInvoiceOptional.isPresent()){
-            prescriptionItems = prescriptionItemRepository.findAllByPrescription(prescriptionByInvoiceOptional.get());
+        List<PrescriptionItemDTO> prescriptionItems = new ArrayList<>();
+        if(prescriptionByInvoiceOptional != null){
+            System.out.println("maDOnthuoc: " + prescriptionByInvoiceOptional.getId());
+            try {
+                prescriptionItems = prescriptionItemRepository.findAllByPrescriptionId(prescriptionByInvoiceOptional.getId());
+            } catch (Exception e) {
+                System.out.println("Loi đoan prescriptionId" + e.getMessage());
+            }
         }
         Double totalAmount = getTotalAmount(serviceInInvoices) + getTotalAmount(servicePackageInInvoices)
-                + getTotalAmount(prescriptionItems) + getTotalAmount(productInInvoices) + getTotalAmount(vaccineInInvoices);
+                + getTotalAmountPrescriptionItem(prescriptionItems) + getTotalAmount(productInInvoices) + getTotalAmount(vaccineInInvoices);
         Double totalDiscountAmount = getTotalDiscountAmount(invoiceDiscounts) + getPromotionAmount(serviceInInvoices)
-                +getPromotionAmount(servicePackageInInvoices) + getPromotionAmount(prescriptionItems)
+                +getPromotionAmount(servicePackageInInvoices) + getPromotionAmountPrescriptionItem(prescriptionItems)
                 + getPromotionAmount(productInInvoices) + getPromotionAmount(vaccineInInvoices);
-        Double taxTotalAmount = getTotalAmount(serviceInInvoices) + getTotalAmount(servicePackageInInvoices)
-                + getTaxTotalAmount(prescriptionItems) + getTaxTotalAmount(productInInvoices) + getTaxTotalAmount(vaccineInInvoices);
+        Double taxTotalAmount = getTaxTotalAmount(serviceInInvoices) + getTaxTotalAmount(servicePackageInInvoices)
+                + getTaxTotalAmountPrescriptionItem(prescriptionItems) + getTaxTotalAmount(productInInvoices) + getTaxTotalAmount(vaccineInInvoices);
         Double finalAmount = totalAmount - totalDiscountAmount + taxTotalAmount;
 
         invoiceById.setTotalAmount(totalAmount);
@@ -409,7 +502,7 @@ public class InvoiceService {
 
     }
 
-
+    // Them Discount
     public InvoiceDiscountResponse addDiscountToInvoice(Long invoiceId, AddDiscountToInvoiceRequest request) {
         Invoice invoiceById =  invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("invoice not found"));
@@ -443,6 +536,12 @@ public class InvoiceService {
                 .mapToDouble(AbstractInvoiceItem::getTotalPrice)
                 .sum();
     }
+    private Double getTotalAmountPrescriptionItem(List<PrescriptionItemDTO> items) {
+        if (items == null || items.isEmpty()) return 0.0;
+        return items.stream()
+                .mapToDouble(PrescriptionItemDTO::getTotalPrice)
+                .sum();
+    }
     private Double getTotalDiscountAmount(List<InvoiceDiscount> discounts) {
         if (discounts == null || discounts.isEmpty()) return 0.0;
         return discounts.stream().mapToDouble(InvoiceDiscount::getAppliedAmount)
@@ -454,10 +553,22 @@ public class InvoiceService {
                 .mapToDouble(AbstractInvoiceItem::getTaxAmount)
                 .sum();
     }
+    private Double getTaxTotalAmountPrescriptionItem(List<PrescriptionItemDTO> items) {
+        if (items == null || items.isEmpty()) return 0.0;
+        return items.stream()
+                .mapToDouble(PrescriptionItemDTO::getTaxAmount)
+                .sum();
+    }
     private Double getPromotionAmount(List<? extends AbstractInvoiceItem> items) {
         if (items == null || items.isEmpty()) return 0.0;
         return items.stream()
                 .mapToDouble(AbstractInvoiceItem::getPromotionAmount)
+                .sum();
+    }
+    private Double getPromotionAmountPrescriptionItem(List<PrescriptionItemDTO> items) {
+        if (items == null || items.isEmpty()) return 0.0;
+        return items.stream()
+                .mapToDouble(PrescriptionItemDTO::getPromotionAmount)
                 .sum();
     }
     private Integer adjustQuantity(StockMovementType type, Integer requestQuantity, Integer inventoryItemQuantity) {
@@ -477,6 +588,19 @@ public class InvoiceService {
 
             default -> throw new RuntimeException("Invalid Movement Type");
         };
+    }
+
+    public CreatePaymentResponse createPaymentForInvoice(Long invoiceId, CreatePaymentRequest request) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found with id: " + invoiceId));
+
+        PaymentResponse response = new PaymentResponse();
+        Payment paymentForInvoice =  new Payment();
+        paymentForInvoice.setInvoice(invoice);
+        paymentForInvoice.setAmount(Double.valueOf(request.getAmount()));
+        paymentForInvoice.setPaymentDate(LocalDate.now());
+
+        return new CreatePaymentResponse();
     }
 
 
@@ -752,6 +876,33 @@ public class InvoiceService {
                 .build();
     }
 
+    private AddPromotionToInvoiceResponse convertToAddAddPromotionToInvoiceResponse(Long invoiceId, Promotion promotion) {
+        return AddPromotionToInvoiceResponse.builder()
+                .invoiceId(invoiceId)
+                .promotionId(promotion.getId())
+                .promotionName(promotion.getName())
+                .promotionType(promotion.getType())
+                .promotionValue(promotion.getValue())
+                .promotionStartDate(promotion.getStartDate())
+                .promotionEndDate(promotion.getEndDate())
+                .promotionStatus(promotion.getStatus())
+                .message("")
+                .build();
+    }
+    private AddPromotionToInvoiceResponse convertToAddAddPromotionToInvoiceResponse(Long invoiceId, Promotion promotion, String message) {
+        return AddPromotionToInvoiceResponse.builder()
+                .invoiceId(invoiceId)
+                .promotionId(promotion.getId())
+                .promotionName(promotion.getName())
+                .promotionType(promotion.getType())
+                .promotionValue(promotion.getValue())
+                .promotionStartDate(promotion.getStartDate())
+                .promotionEndDate(promotion.getEndDate())
+                .promotionStatus(promotion.getStatus())
+                .message(message)
+                .build();
+    }
+
     private InvoiceDiscountResponse convertToInvoiceDiscount(InvoiceDiscount invoiceDiscount){
         return InvoiceDiscountResponse.builder()
                 .discountId(invoiceDiscount.getDiscount() != null ? invoiceDiscount.getDiscount().getId() : null)
@@ -760,6 +911,7 @@ public class InvoiceService {
                 .message("")
                 .build();
     }
+
     private InvoiceDiscountResponse convertToInvoiceDiscount(InvoiceDiscount invoiceDiscount, String message) {
         return InvoiceDiscountResponse.builder()
                 .discountId(invoiceDiscount.getDiscount() != null ? invoiceDiscount.getDiscount().getId() : null)
@@ -770,6 +922,173 @@ public class InvoiceService {
     }
 
 
+    private InvoiceItemsResponse convertToInvoiceItemsResponse(
+            Long invoiceId,
+            List<Payment> paymentList,
+            List<ProductInInvoice> productInInvoiceList,
+            List<ServicePackageInInvoice> servicePackageInInvoiceList,
+            List<ServiceInInvoice> serviceInInvoiceList,
+            List<InvoiceDiscount> invoiceDiscountList,
+            Prescription prescription,
+            List<PrescriptionItem> prescriptionItemList,
+            List<VaccineInInvoice> vaccineInInvoiceList,
+            String message
 
+    ){
+        return InvoiceItemsResponse.builder()
+                .invoiceId(invoiceId)
+                .paymentList(
+                    paymentList.stream().map(
+                p -> PaymentResponse.builder()
+                        .id(p.getId())
+                        .paymentDate(p.getPaymentDate())
+                        .amount(p.getAmount())
+                        .method(p.getMethod())
+                        .status(p.getStatus())
+                        .statusDisplayName(p.getStatus().getDisplayName())
+                        .transactionCode(p.getTransactionCode())
+                        .invoiceId(invoiceId)
+                        .description(p.getDescription())
+                        .createdAt(p.getCreatedAt())
+                        .updatedAt(p.getUpdatedAt())
+                        .build()
+                    ).toList()
+                )
+                .invoiceDiscountList(
+                    invoiceDiscountList.stream().map(
+                    i -> InvoiceDiscountResponse.builder()
+                        .discountId(i.getDiscount() != null ? i.getDiscount().getId() : null)
+                        .invoiceId(invoiceId)
+                        .appliedAmount(i.getAppliedAmount())
+                        .message("")
+                        .build()
+                    ).toList()
+                )
+                .serviceInInvoiceList(
+                    serviceInInvoiceList.stream().map(
+                    s -> ServiceInInvoiceResponse.builder()
+                            .id(s.getId())
+                            .price(s.getPrice())
+                            .quantity(s.getQuantity())
+                            .taxAmount(s.getTaxAmount())
+                            .promotionAmount(s.getPromotionAmount())
+                            .notes(s.getNotes())
+                            .serviceId(s.getService() != null ? s.getService().getId() : null)
+                            .serviceName(s.getService() != null ? s.getService().getName() : null)
+                            .serviceDescription(s.getService() != null ? s.getService().getDescription() : null)
+                            .serviceCategory(s.getService() != null ? s.getService().getCategory() : null)
+                            .message("")
+                            .build()
+                    ).toList()
+                )
+                .servicePackageInInvoiceList(
+                    servicePackageInInvoiceList.stream().map(
+                sp -> ServicePackageInInvoiceResponse.builder()
+                        .id(sp.getId())
+                        .price(sp.getPrice())
+                        .quantity(sp.getQuantity())
+                        .taxAmount(sp.getTaxAmount())
+                        .promotionAmount(sp.getPromotionAmount())
+                        .notes(sp.getNotes())
+                        .servicePackageId(sp.getServicePackage() != null ? sp.getServicePackage().getId() : null)
+                        .servicePackageName(sp.getServicePackage() != null ? sp.getServicePackage().getName() : null)
+                        .servicePackageDescription(sp.getServicePackage() != null ? sp.getServicePackage().getDescription() : null)
+                        .message("")
+                        .build()
+
+                    ).toList()
+                )
+                .productInInvoiceList(
+                        productInInvoiceList.stream().map(
+                                pi -> ProductInInvoiceResponse.builder()
+                                        .id(pi.getId())
+                                        .price(pi.getPrice())
+                                        .quantity(pi.getQuantity())
+                                        .taxAmount(pi.getTaxAmount())
+                                        .promotionAmount(pi.getPromotionAmount())
+                                        .notes(pi.getNotes())
+                                        .productId(pi.getProduct() != null ? pi.getProduct().getId() : null)
+                                        .productName(pi.getProduct() != null ? pi.getProduct().getName() : null)
+                                        .productCategory(pi.getProduct() != null ? pi.getProduct().getCategory() : null)
+                                        .productBrand(pi.getProduct() != null ? pi.getProduct().getBrand() : null)
+                                        .message("")
+                                        .build()
+                        ).toList()
+                )
+                .prescription(prescription != null ?
+                        new PrescriptionInInvoiceResponse(
+                        prescription.getId(),
+                        prescription.getCreatedDate(),
+                        prescription.getNotes(),
+                        invoiceId,
+                        prescription.getDoctor() != null ? prescription.getDoctor().getId() : null,
+                        prescription.getDoctor() != null ? prescription.getDoctor().getFullname() : null,
+                        ""
+                )
+                        : null)
+                .prescriptionItemList(
+                        prescriptionItemList.stream().map(
+                                pri -> PrescriptionItemResponse.builder()
+                                        .id(pri.getId())
+                                        .dosage(pri.getDosage())
+                                        .duration(pri.getDuration())
+                                        .quantity(pri.getQuantity())
+                                        .instruction(pri.getInstruction())
+                                        .price(pri.getPrice())
+                                        .taxPercent(pri.getTaxPercent())
+                                        .promotionAmount(pri.getPromotionAmount())
+                                        .totalAmount(pri.getPrice()*pri.getQuantity() + pri.getTaxAmount() - pri.getPromotionAmount())
+                                        .medicineId(pri.getMedicine() != null ? pri.getMedicine().getId() : null)
+                                        .medicineName(pri.getMedicine() != null ? pri.getMedicine().getName() : null)
+                                        .medicineDescription(pri.getMedicine() != null ? pri.getMedicine().getDescription() : null)
+                                        .prescriptionId(pri.getPrescription() != null ? pri.getPrescription().getId() : null)
+                                        .message("")
+                                        .build()
+                        ).toList()
+                )
+                .vaccineInInvoiceList(
+                        vaccineInInvoiceList.stream().map(
+                                vi -> VaccineInInvoiceResponse.builder()
+                                        .id(vi.getId())
+                                        .price(vi.getPrice())
+                                        .quantity(vi.getQuantity())
+                                        .notes(vi.getNotes())
+                                        .taxAmount(vi.getTaxAmount())
+                                        .promotionAmount(vi.getPromotionAmount())
+                                        .vaccineId(vi.getVaccine() != null ? vi.getVaccine().getId() : null)
+                                        .vaccineName(vi.getVaccine() != null ? vi.getVaccine().getName() : null)
+                                        .vaccineManufacturer(vi.getVaccine() != null ? vi.getVaccine().getManufacturer() : null)
+                                        .build()
+                        ).toList()
+                )
+                .build();
+    }
+
+
+    public InvoiceResponse confirmPaymentSuccess(Long invoiceId, ConfirmPaymentSuccessRequest request) {
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new RuntimeException("Invoice not found"));
+        invoice.setStatus(InvoiceStatus.PAID);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+        Payment paymentByInvoice = paymentRepository.findByInvoice(invoice).orElseThrow(() -> new RuntimeException("Payment not found"));
+        paymentByInvoice.setStatus(PaymentStatus.SUCCESS);
+        paymentByInvoice.setUpdatedAt(LocalDateTime.now());
+        paymentByInvoice.setTransactionCode(request.getTransactionCode());
+        Payment savedPayment = paymentRepository.save(paymentByInvoice);
+        return convertToResponse(savedInvoice, "Payment for invoice with id " + savedInvoice.getId() + " success.");
+    }
+
+    public InvoiceResponse confirmPaymentFailed(Long invoiceId, ConfirmPaymentFailedRequest request) {
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new RuntimeException("Invoice not found"));
+        invoice.setStatus(InvoiceStatus.VOID);
+        Invoice savedInvoice = invoiceRepository.save(invoice);
+        Payment paymentByInvoice = paymentRepository.findByInvoice(savedInvoice).orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        paymentByInvoice.setStatus(request.getPaymentStatus());
+        paymentByInvoice.setUpdatedAt(LocalDateTime.now());
+        paymentByInvoice.setTransactionCode(request.getTransactionCode());
+
+        Payment savedPayment = paymentRepository.save(paymentByInvoice);
+        return convertToResponse(savedInvoice, "Payment for invoice with id " + savedInvoice.getId() + " failed.");
+    }
 }
 

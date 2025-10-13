@@ -20,7 +20,7 @@ public class Customer {
     @Column(name = "fullname")
     private String fullname;
 
-    @Column(name = "client_id")
+    @Column(name = "client_id", unique = true)
     private String clientId;
 
     @Column(name = "phone")

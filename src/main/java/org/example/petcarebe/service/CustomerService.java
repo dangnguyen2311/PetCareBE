@@ -60,9 +60,16 @@ public class CustomerService {
     }
 
     public CustomerRespone getCustomerByClientId(String clientId) {
+        System.out.println("ClientId dang nhap dang ky kham: " + clientId);
         Customer customer = customerRepository.findByClientId(clientId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-        return convertToResponse(customer, "Customer found successfully");
+                .orElse(null);
+        if (customer == null) {
+            customer = new Customer();
+            customer.setClientId(clientId);
+            Customer savedCustomer = customerRepository.save(customer);
+            return convertToResponse(savedCustomer, "Customer found successfully");
+        }
+        else return convertToResponse(customer, "Customer found successfully");
     }
 
     public CustomerRespone updateCustomer(Long customerId, UpdateCustomerRequest request) {
@@ -110,9 +117,24 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
+//    private CustomerRespone convertToResponse(Customer customer, String message) {
+//        return new CustomerRespone(
+//                customer.getId(),
+//                customer.getClientId(),
+//                customer.getFullname() != null ?  customer.getFullname() : "",
+//                customer.getEmail() != null ? customer.getEmail() : "",
+//                customer.getPhone() != null ? customer.getPhone() : "",
+//                customer.getGender() != null ? customer.getGender() : "",
+//                customer.getAddress()  != null ? customer.getAddress() : "",
+//                customer.getDateOfBirth() != null ? customer.getDateOfBirth() : LocalDate.of(2020, 10, 10),
+//                customer.getStatus(),
+//                message
+//        );
+//    }
     private CustomerRespone convertToResponse(Customer customer, String message) {
         return new CustomerRespone(
                 customer.getId(),
+                customer.getClientId(),
                 customer.getFullname(),
                 customer.getEmail(),
                 customer.getPhone(),
@@ -125,7 +147,9 @@ public class CustomerService {
     }
 
     private CustomerRespone convertToResponse(Customer customer) {
-        return new CustomerRespone(customer.getId(),
+        return new CustomerRespone(
+                customer.getId(),
+                customer.getClientId(),
                 customer.getFullname(),
                 customer.getEmail(),
                 customer.getPhone(),
