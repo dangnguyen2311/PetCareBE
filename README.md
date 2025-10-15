@@ -73,7 +73,7 @@ External Services: [VNPay] [Cloudinary] [Email Service]
 
 ### Sơ đồ cơ sở dữ liệu (ERD)
 <!-- TODO: Thêm ảnh Entity Relationship Diagram -->
-![Database ERD](docs/images/CSDL_PetCare.png)
+![Database ERD](docs/images/Database_PetCare.png)
 
 [//]: # (## Cấu trúc dự án)
 
