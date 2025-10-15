@@ -1234,8 +1234,8 @@ External Services: [VNPay] [Cloudinary] [Email Service]
 
 ### Bước 1: Clone repository
 ```bash
-git clone https://github.com/your-repo/petcare-backend.git
-cd petcare-backend
+git clone https://github.com/dangnguyen2311/PetCareBE.git
+cd PetCareBE
 ```
 
 ### Bước 2: Cấu hình database
@@ -1645,7 +1645,7 @@ Final Amount = Total - Promotion + Tax
 
 **Pet Care Backend System** - Giải pháp quản lý phòng khám thú y hiện đại và toàn diện 🐾
 
-[![Made with ❤️ by Pet Care Team](https://img.shields.io/badge/Made%20with%20❤️%20by-Pet%20Care%20Team-red.svg)](https://github.com/dangnguyen2311/PetCareBE)
+[![Made with ❤️ by ME](https://img.shields.io/badge/Made%20with%20❤️%20by-Pet%20Care%20Team-red.svg)](https://github.com/dangnguyen2311/PetCareBE)
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-green.svg)](https://spring.io/projects/spring-boot)
