@@ -1,14 +1,19 @@
 package org.example.petcarebe.service;
 
 import org.example.petcarebe.dto.request.notification.CreateNotificationBroadcastRequest;
+import org.example.petcarebe.dto.request.notification.CreateNotificationRequest;
+import org.example.petcarebe.dto.request.notification.CreateNotificationStaffOrDoctorRequest;
 import org.example.petcarebe.dto.response.notification.BroadcastNotificationResponse;
+import org.example.petcarebe.dto.response.notification.CreateNotificationStaffOrDoctorResponse;
 import org.example.petcarebe.dto.response.notification.NotificationResponse;
 import org.example.petcarebe.dto.response.notification.SocketNotificationResponse;
-import org.example.petcarebe.model.Notification;
-import org.example.petcarebe.model.User;
+import org.example.petcarebe.model.*;
+import org.example.petcarebe.repository.CustomerRepository;
 import org.example.petcarebe.repository.NotificationRepository;
 import org.example.petcarebe.repository.UserRepository;
+import org.example.petcarebe.repository.VaccineScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +22,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Service
 public class WebSocketNotificationService {
@@ -27,6 +33,12 @@ public class WebSocketNotificationService {
     private UserRepository userRepository;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private VaccineScheduleRepository vaccineScheduleRepository;
     
     /**
      * Send notification to specific user
@@ -188,6 +200,73 @@ public class WebSocketNotificationService {
     }
 
 
+    public NotificationResponse sendPrivateNotification(CreateNotificationRequest request) {
+        Customer customer = customerRepository.findById(request.getCustomerId()).orElse(null);
+        VaccineSchedule vaccineSchedule = null;
+        if (request.getVaccineScheduleId() != null) {
+            Optional<VaccineSchedule> vaccineScheduleOptional = vaccineScheduleRepository.findById(request.getVaccineScheduleId());
+            vaccineSchedule = vaccineScheduleOptional.orElse(null);
+        }
+        Notification notification = new Notification();
+        notification.setTitle(request.getTitle());
+        notification.setMessage(request.getMessage());
+        notification.setType(request.getType());
+        notification.setCreatedDate(LocalDate.now());
+        notification.setStatus("GENERAL");
+        notification.setCustomer(customer);
+        notification.setVaccineSchedule(vaccineSchedule);
+        Notification savedNotification = notificationRepository.save(notification);
 
+        NotificationResponse notificationResponse = new NotificationResponse();
+        notificationResponse.setId(savedNotification.getId());
+        notificationResponse.setTitle(savedNotification.getTitle());
+        notificationResponse.setMessage(savedNotification.getMessage());
+        notificationResponse.setType(savedNotification.getType());
+        notificationResponse.setCreatedAt(LocalDateTime.now());
+        notificationResponse.setTimeStamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        notificationResponse.setIsRead(false);
+        notificationResponse.setStatus("GENERAL");
+        notificationResponse.setResponseMessage("Response: " + savedNotification.getMessage());
+        notificationResponse.setCreatedDate(savedNotification.getCreatedDate());
+        notificationResponse.setVaccineScheduleId(request.getVaccineScheduleId());
+        notificationResponse.setCustomerId(customer != null ? customer.getId() : null);
+        notificationResponse.setCustomerName(customer != null ? customer.getFullname() : null);
+        notificationResponse.setCustomerEmail(customer != null ? customer.getEmail() : null);
+
+
+        sendNotificationToUser(request.getCustomerId(), notificationResponse);
+        return notificationResponse;
+    }
+
+    public CreateNotificationStaffOrDoctorResponse sendPrivateToSTaffOrDoctorNotification(CreateNotificationStaffOrDoctorRequest request) {
+        String username = request.getUsername();
+        User user = userRepository.findByUsername(username).orElse(null);
+        Notification notification = new Notification();
+        notification.setTitle(request.getTitle());
+        notification.setMessage(request.getMessage());
+        notification.setType(request.getType());
+        notification.setCreatedDate(LocalDate.now());
+        notification.setStatus("GENERAL");
+
+        Notification savedNotification = notificationRepository.save(notification);
+        return convertToCreateNotificationStaffOrDoctorResponse(notification);
+
+    }
+
+    private CreateNotificationStaffOrDoctorResponse convertToCreateNotificationStaffOrDoctorResponse(Notification  notification) {
+        return CreateNotificationStaffOrDoctorResponse.builder()
+                .id(notification.getId())
+                .title(notification.getTitle())
+                .message(notification.getMessage())
+                .type(notification.getType())
+                .status(notification.getStatus())
+                .createdDate(notification.getCreatedDate())
+                .responseMessage(notification.getMessage())
+                .createdAt(LocalDateTime.now())
+                .isRead(false)
+                .userId(0L)
+                .timeStamp("")
+                .build();
+    }
 
 }

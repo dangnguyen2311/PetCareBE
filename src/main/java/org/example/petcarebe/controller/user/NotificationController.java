@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.petcarebe.dto.request.notification.CreateNotificationBroadcastRequest;
 import org.example.petcarebe.dto.request.notification.CreateNotificationRequest;
+import org.example.petcarebe.dto.request.notification.CreateNotificationStaffOrDoctorRequest;
 import org.example.petcarebe.dto.request.notification.UpdateNotificationStatusRequest;
 import org.example.petcarebe.dto.response.notification.BroadcastNotificationResponse;
+import org.example.petcarebe.dto.response.notification.CreateNotificationStaffOrDoctorResponse;
 import org.example.petcarebe.dto.response.notification.NotificationResponse;
 import org.example.petcarebe.model.Notification;
 import org.example.petcarebe.service.NotificationService;
@@ -61,18 +63,42 @@ public class NotificationController {
         }
     }
 
-    @GetMapping("/notification/{username}")
-    public ResponseEntity<?> sendTestNotification(@PathVariable String username) {
-        NotificationResponse notification = new NotificationResponse();
-        notification.setId(System.currentTimeMillis());
-        notification.setTitle("Test Notification");
-        notification.setMessage("This is a test notification sent at " +
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-        notification.setType("info");
+    @PostMapping("/private-user")
+    public ResponseEntity<NotificationResponse> sendPrivateNotificationToUser(@RequestBody CreateNotificationRequest request) {
+        try {
+            NotificationResponse response = webSocketNotificationService.sendPrivateNotification(request);
+//            return ResponseEntity.ok(Map.of("message", "Broadcast notification sent successfully"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        catch (RuntimeException e) {
+            NotificationResponse error = new NotificationResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+        catch (Exception e) {
+            NotificationResponse error = new NotificationResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
 
-        webSocketNotificationService.sendNotificationToUserName(username, notification);
-
-        return ResponseEntity.ok("Private Notification sent to " + username);
+    @PostMapping("/private-staff")
+    public ResponseEntity<CreateNotificationStaffOrDoctorResponse> sendPrivateNotificationToStaffOrDoctor(@RequestBody CreateNotificationStaffOrDoctorRequest request) {
+        try {
+            CreateNotificationStaffOrDoctorResponse response = webSocketNotificationService.sendPrivateToSTaffOrDoctorNotification(request);
+//            return ResponseEntity.ok(Map.of("message", "Broadcast notification sent successfully"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        catch (RuntimeException e) {
+            CreateNotificationStaffOrDoctorResponse error = new CreateNotificationStaffOrDoctorResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+        catch (Exception e) {
+            CreateNotificationStaffOrDoctorResponse error = new CreateNotificationStaffOrDoctorResponse();
+            error.setMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 
     @Operation(

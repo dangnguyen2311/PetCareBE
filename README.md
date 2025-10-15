@@ -1,17 +1,17 @@
-# 🐾 Pet Care Backend System
+#Pet Care Backend System
 
-## 📋 Giới thiệu dự án
+## Giới thiệu dự án
 
 **Pet Care Backend** là một hệ thống quản lý phòng khám thú y toàn diện được xây dựng bằng **Spring Boot 3.5.5** và **Java 21**. Hệ thống cung cấp các API RESTful để quản lý toàn bộ quy trình hoạt động của một phòng khám thú y, từ việc đặt lịch hẹn, quản lý thông tin thú cưng, chẩn đoán bệnh, kê đơn thuốc, đến thanh toán và báo cáo thống kê.
 
-### 🎯 Mục tiêu dự án
+### Mục tiêu dự án
 - Số hóa quy trình quản lý phòng khám thú y
 - Tối ưu hóa trải nghiệm khách hàng và bác sĩ thú y
 - Quản lý hiệu quả thông tin y tế thú cưng
 - Tự động hóa quy trình thanh toán và báo cáo
 - Cung cấp hệ thống thống kê và phân tích dữ liệu
 
-## 🏗️ Kiến trúc hệ thống
+## Kiến trúc hệ thống
 
 ### Kiến trúc tổng quan
 ```
@@ -44,9 +44,10 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 📊 Sơ đồ kiến trúc hệ thống
+### Sơ đồ kiến trúc hệ thống
 <!-- TODO: Thêm ảnh sơ đồ kiến trúc tổng quan -->
-![System Architecture](docs/images/.png)
+
+[//]: # (![System Architecture]&#40;docs/images/.png&#41;)
 ```markdown
 ┌─────────────────────────────────────────────────────────┐
 │                    CLIENT LAYER                         │
@@ -71,60 +72,106 @@
 External Services: [VNPay] [Cloudinary] [Email Service]
 ```
 
-### 🗃️ Sơ đồ cơ sở dữ liệu (ERD)
+### 🗃Sơ đồ cơ sở dữ liệu (ERD)
 <!-- TODO: Thêm ảnh Entity Relationship Diagram -->
 ![Database ERD](docs/images/CSDL_PetCare.png)
 
-## 🗂️ Cấu trúc dự án
+[//]: # (## Cấu trúc dự án)
 
-```
-src/main/java/org/example/petcarebe/
-├── 📁 config/                 # Cấu hình ứng dụng
-│   ├── SecurityConfig.java    # Cấu hình bảo mật JWT
-│   ├── CloudinaryConfig.java  # Cấu hình upload ảnh
-│   └── VnpayConfig.java      # Cấu hình thanh toán VNPay
-├── 📁 controller/             # REST API Controllers
-│   ├── AppointmentController.java
-│   ├── CustomerController.java
-│   ├── DoctorController.java
-│   ├── PetController.java
-│   ├── DiagnosisController.java
-│   ├── TestResultController.java
-│   ├── InvoiceController.java
-│   └── ... (20+ controllers)
-├── 📁 dto/                    # Data Transfer Objects
-│   ├── request/               # Request DTOs
-│   └── response/              # Response DTOs
-├── 📁 model/                  # JPA Entities
-│   ├── User.java
-│   ├── Customer.java
-│   ├── Pet.java
-│   ├── Doctor.java
-│   ├── Appointment.java
-│   ├── Visit.java
-│   ├── Diagnosis.java
-│   ├── TestResult.java
-│   ├── Prescription.java
-│   ├── Invoice.java
-│   └── ... (40+ entities)
-├── 📁 repository/             # Data Access Layer
-│   └── ... (40+ repositories)
-├── 📁 service/                # Business Logic Layer
-│   └── ... (40+ services)
-├── 📁 security/               # JWT Authentication
-│   ├── JwtUtil.java
-│   ├── AuthController.java
-│   └── CustomUserDetailsService.java
-├── 📁 enums/                  # Enumerations
-│   ├── AppointmentStatus.java
-│   ├── InvoiceStatus.java
-│   ├── PaymentStatus.java
-│   └── StockMovementType.java
-└── 📁 util/                   # Utility Classes
-    └── VnpayUtil.java
-```
+[//]: # ()
+[//]: # (```)
 
-## 🔧 Công nghệ sử dụng
+[//]: # (src/main/java/org/example/petcarebe/)
+
+[//]: # (├── 📁 config/                 # Cấu hình ứng dụng)
+
+[//]: # (│   ├── SecurityConfig.java    # Cấu hình bảo mật JWT)
+
+[//]: # (│   ├── CloudinaryConfig.java  # Cấu hình upload ảnh)
+
+[//]: # (│   └── VnpayConfig.java      # Cấu hình thanh toán VNPay)
+
+[//]: # (├── 📁 controller/             # REST API Controllers)
+
+[//]: # (│   ├── AppointmentController.java)
+
+[//]: # (│   ├── CustomerController.java)
+
+[//]: # (│   ├── DoctorController.java)
+
+[//]: # (│   ├── PetController.java)
+
+[//]: # (│   ├── DiagnosisController.java)
+
+[//]: # (│   ├── TestResultController.java)
+
+[//]: # (│   ├── InvoiceController.java)
+
+[//]: # (│   └── ... &#40;20+ controllers&#41;)
+
+[//]: # (├── 📁 dto/                    # Data Transfer Objects)
+
+[//]: # (│   ├── request/               # Request DTOs)
+
+[//]: # (│   └── response/              # Response DTOs)
+
+[//]: # (├── 📁 model/                  # JPA Entities)
+
+[//]: # (│   ├── User.java)
+
+[//]: # (│   ├── Customer.java)
+
+[//]: # (│   ├── Pet.java)
+
+[//]: # (│   ├── Doctor.java)
+
+[//]: # (│   ├── Appointment.java)
+
+[//]: # (│   ├── Visit.java)
+
+[//]: # (│   ├── Diagnosis.java)
+
+[//]: # (│   ├── TestResult.java)
+
+[//]: # (│   ├── Prescription.java)
+
+[//]: # (│   ├── Invoice.java)
+
+[//]: # (│   └── ... &#40;40+ entities&#41;)
+
+[//]: # (├── 📁 repository/             # Data Access Layer)
+
+[//]: # (│   └── ... &#40;40+ repositories&#41;)
+
+[//]: # (├── 📁 service/                # Business Logic Layer)
+
+[//]: # (│   └── ... &#40;40+ services&#41;)
+
+[//]: # (├── 📁 security/               # JWT Authentication)
+
+[//]: # (│   ├── JwtUtil.java)
+
+[//]: # (│   ├── AuthController.java)
+
+[//]: # (│   └── CustomUserDetailsService.java)
+
+[//]: # (├── 📁 enums/                  # Enumerations)
+
+[//]: # (│   ├── AppointmentStatus.java)
+
+[//]: # (│   ├── InvoiceStatus.java)
+
+[//]: # (│   ├── PaymentStatus.java)
+
+[//]: # (│   └── StockMovementType.java)
+
+[//]: # (└── 📁 util/                   # Utility Classes)
+
+[//]: # (    └── VnpayUtil.java)
+
+[//]: # (```)
+
+## Công nghệ sử dụng
 
 ### Backend Framework
 - **Spring Boot 3.5.5** - Framework chính
@@ -169,9 +216,9 @@ src/main/java/org/example/petcarebe/
 - **Mockito** - Mocking framework
 - **Spring Boot Test** - Integration testing
 
-## 🚀 Tính năng chính
+## Tính năng chính
 
-### 👥 Quản lý người dùng & Phân quyền
+### Quản lý người dùng & Phân quyền
 - **Đăng ký/Đăng nhập** với JWT authentication
 - **Phân quyền 4 cấp**: ADMIN, DOCTOR, STAFF, CUSTOMER
 - **Quản lý profile** và thông tin cá nhân
@@ -179,7 +226,7 @@ src/main/java/org/example/petcarebe/
 - **Quản lý nhân viên** (Staff Management)
 - **Quản lý bác sĩ** (Doctor Management) với chuyên môn và lịch làm việc
 
-### 🐕 Quản lý thú cưng & Khách hàng
+### Quản lý thú cưng & Khách hàng
 - **Đăng ký thú cưng** với thông tin chi tiết (loại, giống, tuổi, cân nặng)
 - **Quản lý khách hàng** với lịch sử giao dịch
 - **Theo dõi sức khỏe**: cân nặng, tiêm chủng, dinh dưỡng
@@ -187,7 +234,7 @@ src/main/java/org/example/petcarebe/
 - **Upload hình ảnh** thú cưng qua Cloudinary
 - **Quản lý loại động vật** (Animal Types)
 
-### 📅 Quản lý lịch hẹn & Lịch làm việc
+### Quản lý lịch hẹn & Lịch làm việc
 - **Đặt lịch hẹn** trực tuyến với bác sĩ
 - **Xác nhận/Hủy** lịch hẹn
 - **Quản lý lịch làm việc** bác sĩ (Work Schedule)
@@ -195,7 +242,7 @@ src/main/java/org/example/petcarebe/
 - **Hệ thống queue** và số thứ tự
 - **Trạng thái lịch hẹn**: PENDING, CONFIRMED, CANCELLED, COMPLETED
 
-### 🏥 Quản lý khám chữa bệnh
+### Quản lý khám chữa bệnh
 - **Tạo visit** và ghi nhận phiên khám bệnh
 - **Chẩn đoán bệnh** (Diagnosis) với database bệnh
 - **Quản lý bệnh** (Disease Management)
@@ -203,7 +250,7 @@ src/main/java/org/example/petcarebe/
 - **Kê đơn thuốc** (Prescription) và theo dõi điều trị
 - **Lịch sử khám bệnh** đầy đủ theo thú cưng
 
-### 💊 Quản lý kho & Thuốc
+### Quản lý kho & Thuốc
 - **Quản lý inventory** thuốc, vaccine, sản phẩm
 - **Inventory Objects**: Medicine, Product, Vaccine, Equipment, Supply
 - **Inventory Items**: Theo dõi số lượng tồn kho
@@ -219,13 +266,13 @@ src/main/java/org/example/petcarebe/
   - Service Package Price History
 - **Cảnh báo hết hàng** và hạn sử dụng
 
-### 💉 Quản lý tiêm chủng
+### Quản lý tiêm chủng
 - **Lịch tiêm chủng** (Vaccination Schedule)
 - **Hồ sơ tiêm chủng** (Vaccination Records)
 - **Quản lý vaccine** với giá và tồn kho
 - **Nhắc nhở tiêm chủng** định kỳ
 
-### 💰 Quản lý hóa đơn & Thanh toán
+### Quản lý hóa đơn & Thanh toán
 - **Tạo hóa đơn** (Invoice) tự động
 - **Thêm dịch vụ** vào hóa đơn:
   - Services (dịch vụ đơn lẻ)
@@ -243,7 +290,7 @@ src/main/java/org/example/petcarebe/
 - **Trạng thái hóa đơn**: DRAFT, PENDING, PAID, CANCELLED
 - **Theo dõi công nợ** và lịch sử thanh toán
 
-### 🎁 Quản lý khuyến mãi
+### Quản lý khuyến mãi
 - **Promotion Management**: Tạo và quản lý chương trình khuyến mãi
 - **Discount Management**: Mã giảm giá cho hóa đơn
 - **Áp dụng khuyến mãi** cho:
@@ -254,20 +301,20 @@ src/main/java/org/example/petcarebe/
   - Medicines
 - **Loại khuyến mãi**: CASH (tiền mặt) hoặc PERCENT (phần trăm)
 
-### 🔔 Hệ thống thông báo
+### Hệ thống thông báo
 - **WebSocket real-time notifications**
 - **Thông báo cá nhân** (Private notifications)
 - **Thông báo công khai** (Public notifications)
 - **Đánh dấu đã đọc/chưa đọc**
 - **Lịch sử thông báo**
 
-### 📧 Gửi Email
+### Gửi Email
 - **Email thông báo** lịch hẹn
 - **Email xác nhận** thanh toán
 - **Email nhắc nhở** tiêm chủng
 - **Template email** tùy chỉnh
 
-### 📊 Báo cáo và thống kê
+### Báo cáo và thống kê
 - **Dashboard** tổng quan
 - **Thống kê doanh thu** theo thời gian
 - **Báo cáo bệnh** phổ biến
@@ -276,14 +323,14 @@ src/main/java/org/example/petcarebe/
 - **Thống kê inventory** và stock movement
 - **Báo cáo tài chính** chi tiết
 
-### 🖼️ Quản lý hình ảnh
+### Quản lý hình ảnh
 - **Upload ảnh** lên Cloudinary
 - **Quản lý ảnh** thú cưng, sản phẩm, dịch vụ
 - **Tối ưu hóa** và resize ảnh tự động
 
-## 📦 Chi tiết các Module
+## Chi tiết các Module
 
-### 1. 🔐 Authentication & Authorization Module
+### 1.Authentication & Authorization Module
 **Mô tả**: Quản lý xác thực và phân quyền người dùng
 - JWT token-based authentication
 - 4 roles: ADMIN, DOCTOR, STAFF, CUSTOMER
@@ -296,7 +343,7 @@ src/main/java/org/example/petcarebe/
 - `POST /api/auth/register` - Đăng ký
 - `POST /api/auth/refresh` - Refresh token
 
-### 2. 👥 Customer & Pet Module
+### 2.Customer & Pet Module
 **Mô tả**: Quản lý thông tin khách hàng và thú cưng
 - CRUD operations cho Customer
 - CRUD operations cho Pet
@@ -306,7 +353,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Customer, Pet, AnimalType
 
-### 3. 📅 Appointment & Scheduling Module
+### 3.Appointment & Scheduling Module
 **Mô tả**: Quản lý lịch hẹn và lịch làm việc
 - Đặt lịch hẹn với bác sĩ
 - Quản lý Work Schedule của bác sĩ
@@ -316,7 +363,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Appointment, WorkSchedule, ClinicRoom, Doctor
 
-### 4. 🏥 Medical Management Module
+### 4.Medical Management Module
 **Mô tả**: Quản lý khám chữa bệnh và hồ sơ y tế
 - Tạo Visit (phiên khám)
 - Diagnosis (chẩn đoán) với Disease database
@@ -326,7 +373,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Visit, Diagnosis, Disease, TestResult, MedicalRecord
 
-### 5. 💊 Prescription & Medicine Module
+### 5.Prescription & Medicine Module
 **Mô tả**: Quản lý đơn thuốc và thuốc
 - Kê đơn thuốc (Prescription)
 - Thêm thuốc vào đơn (PrescriptionItem)
@@ -336,7 +383,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Prescription, PrescriptionItem, Medicine, MedicinePriceHistory
 
-### 6. 📦 Inventory Management Module
+### 6.Inventory Management Module
 **Mô tả**: Quản lý kho hàng toàn diện
 - **Inventory Objects**: Medicine, Product, Vaccine, Equipment, Supply
 - **Inventory Items**: Số lượng tồn kho theo từng object
@@ -349,7 +396,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: InventoryObject, InventoryItem, StockMovement
 
-### 7. 💉 Vaccination Module
+### 7.Vaccination Module
 **Mô tả**: Quản lý tiêm chủng
 - Vaccination Schedule (lịch tiêm chủng)
 - Vaccination Record (hồ sơ tiêm chủng)
@@ -359,7 +406,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: VaccinationSchedule, VaccinationRecord, Vaccine, VaccinePriceHistory
 
-### 8. 💰 Invoice & Payment Module
+### 8.Invoice & Payment Module
 **Mô tả**: Quản lý hóa đơn và thanh toán
 - **Invoice**: Tạo và quản lý hóa đơn
 - **Invoice Items**:
@@ -378,7 +425,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Invoice, Payment, ServiceInInvoice, ProductInInvoice, VaccineInInvoice, InvoiceDiscount
 
-### 9. 🎁 Promotion & Discount Module
+### 9.Promotion & Discount Module
 **Mô tả**: Quản lý khuyến mãi và giảm giá
 - **Promotion**: Khuyến mãi cho items
   - ServiceInPromotion
@@ -391,7 +438,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Promotion, Discount, InvoiceDiscount, *InPromotion
 
-### 10. 🏢 Service Management Module
+### 10.Service Management Module
 **Mô tả**: Quản lý dịch vụ và gói dịch vụ
 - Service (dịch vụ đơn lẻ)
 - Service Package (gói dịch vụ)
@@ -401,7 +448,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Service, ServicePackage, ServicePriceHistory, ServicePackagePriceHistory
 
-### 11. 🔔 Notification Module
+### 11.Notification Module
 **Mô tả**: Hệ thống thông báo real-time
 - **WebSocket**: Real-time notifications
 - **STOMP Protocol**: Messaging
@@ -413,7 +460,7 @@ src/main/java/org/example/petcarebe/
 
 **Entities**: Notification
 
-### 12. 📧 Email Module
+### 12.Email Module
 **Mô tả**: Gửi email tự động
 - Email xác nhận lịch hẹn
 - Email nhắc nhở tiêm chủng
@@ -421,7 +468,7 @@ src/main/java/org/example/petcarebe/
 - Template email tùy chỉnh
 - JavaMail integration
 
-### 13. 📊 Statistics & Reports Module
+### 13.Statistics & Reports Module
 **Mô tả**: Báo cáo và thống kê
 - Thống kê doanh thu theo thời gian
 - Thống kê lịch hẹn
@@ -429,7 +476,7 @@ src/main/java/org/example/petcarebe/
 - Báo cáo bệnh phổ biến
 - Phân tích xu hướng
 
-### 🖼️ Screenshots
+### Screenshots
 <!-- TODO: Thêm ảnh chụp màn hình các tính năng chính -->
 
 #### Dashboard Admin
@@ -444,7 +491,7 @@ src/main/java/org/example/petcarebe/
 #### Kết quả xét nghiệm
 ![Test Results](docs/images/test-results.png)
 
-## 🔐 Bảo mật
+## Bảo mật
 
 ### Authentication & Authorization
 - **JWT Token** với thời gian hết hạn 30 ngày
@@ -1155,7 +1202,7 @@ src/main/java/org/example/petcarebe/
 
 [//]: # (- Notification)
 
-## 🚀 Cài đặt và chạy dự án
+## Cài đặt và chạy dự án
 
 ### Yêu cầu hệ thống
 - **Java 21** hoặc cao hơn
@@ -1206,7 +1253,7 @@ mvn spring-boot:run
 - **API Base URL**: http://localhost:8081/api
 - **Health Check**: http://localhost:8081/actuator/health
 
-## 🧪 Testing
+## Testing
 
 ### Chạy unit tests
 ```bash
@@ -1229,9 +1276,11 @@ INSERT INTO Customer (fullname, email, phone, status, created_date)
 VALUES ('John Doe', 'john@example.com', '0123456789', 'ACTIVE', CURDATE());
 ```
 
-### 📸 Test Results Screenshots
-<!-- TODO: Thêm ảnh kết quả test -->
-![Test Results](docs/images/test-results-screenshot.png)
+[//]: # (### Test Results Screenshots)
+
+[//]: # (<!-- TODO: Thêm ảnh kết quả test -->)
+
+[//]: # (![Test Results]&#40;docs/images/test-results-screenshot.png&#41;)
 
 [//]: # (## 📈 Performance & Monitoring)
 
@@ -1289,7 +1338,7 @@ VALUES ('John Doe', 'john@example.com', '0123456789', 'ACTIVE', CURDATE());
 [//]: # ()
 [//]: # (Dự án này được phân phối dưới giấy phép MIT License. Xem file `LICENSE` để biết thêm chi tiết.)
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Các lỗi thường gặp
 
@@ -1450,9 +1499,9 @@ Error: Validation failed for argument
 
 [//]: # (- **Security** - JWT authentication, Role-based access control)
 
-## 🌟 Tính năng nổi bật
+## Tính năng nổi bật
 
-### 🔥 Điểm mạnh của hệ thống
+### Điểm mạnh của hệ thống
 
 #### 1. Quản lý toàn diện
 - **End-to-end workflow**: Từ đặt lịch → khám bệnh → kê đơn → thanh toán
