@@ -8,7 +8,6 @@
 - Số hóa quy trình quản lý phòng khám thú y
 - Tối ưu hóa trải nghiệm khách hàng và bác sĩ thú y
 - Quản lý hiệu quả thông tin y tế thú cưng
-- Tự động hóa quy trình thanh toán và báo cáo
 - Cung cấp hệ thống thống kê và phân tích dữ liệu
 
 ## Kiến trúc hệ thống
@@ -72,7 +71,7 @@
 External Services: [VNPay] [Cloudinary] [Email Service]
 ```
 
-### 🗃Sơ đồ cơ sở dữ liệu (ERD)
+### Sơ đồ cơ sở dữ liệu (ERD)
 <!-- TODO: Thêm ảnh Entity Relationship Diagram -->
 ![Database ERD](docs/images/CSDL_PetCare.png)
 
@@ -482,15 +481,38 @@ External Services: [VNPay] [Cloudinary] [Email Service]
 #### Dashboard Admin
 ![Admin Dashboard](docs/images/admin-dashboard.png)
 
+#### Quản lý lịch hẹn khám cho Admin
+![Admin Dashboard](docs/images/appointment-management.png)
+
+#### Quản lý lịch làm việc bác sĩ
+![Admin Dashboard](docs/images/workschedule-management.png)
+
+#### Quản lý thuốc
+![Admin Dashboard](docs/images/medicine-management.png)
+
+#### Quản lý giá
+![Admin Dashboard](docs/images/price-management.png)
+
+#### Quản lý lịch hẹn khám cho nhân viên
+![Admin Dashboard](docs/images/appointment-management-staff.png)
+
+#### Quản lý hóa đơn
+![Admin Dashboard](docs/images/invoice-management.png)
+
+#### Quản lý xuất nhập kho
+![Admin Dashboard](docs/images/stock-management.png)
+
 #### Quản lý thú cưng
 ![Pet Management](docs/images/pet-management.png)
 
-#### Lịch hẹn khám
-![Appointment Booking](docs/images/appointment-booking.png)
-
 #### Kết quả xét nghiệm
-![Test Results](docs/images/test-results.png)
+![Test Results](docs/images/test-result-management.png)
 
+#### Quản lý đơn thuốc
+![Test Results](docs/images/test-result-management.png)
+
+#### Quản lý lượt tiêm vaccine
+![Test Results](docs/images/vaccinationrecord.png)
 ## Bảo mật
 
 ### Authentication & Authorization
@@ -1623,7 +1645,7 @@ Final Amount = Total - Promotion + Tax
 
 **Pet Care Backend System** - Giải pháp quản lý phòng khám thú y hiện đại và toàn diện 🐾
 
-[![Made with ❤️ by Pet Care Team](https://img.shields.io/badge/Made%20with%20❤️%20by-Pet%20Care%20Team-red.svg)](https://github.com/your-repo/petcare-backend)
+[![Made with ❤️ by Pet Care Team](https://img.shields.io/badge/Made%20with%20❤️%20by-Pet%20Care%20Team-red.svg)](https://github.com/dangnguyen2311/PetCareBE)
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-green.svg)](https://spring.io/projects/spring-boot)
